@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   FLUTTER_DIR: frontend
-  RUST_DIR: api
+  RUST_DIR: backend
   DB_DIR: backend/db
   PORT: 8080
 
@@ -12,20 +12,6 @@ tasks:
     cmds:
       - task --list
 
-  # -----------------------------------------
-  # Backend Tasks (Rust)
-  # -----------------------------------------
-  backend:watch:
-    desc: Run Rust backend with hot-reloading (requires cargo-watch)
-    dir: "{{.RUST_DIR}}"
-    cmds:
-      - cargo watch -x run
-
-  backend:build:
-    desc: Build the Rust backend in release mode
-    dir: "{{.RUST_DIR}}"
-    cmds:
-      - cargo build --release
 
   # -----------------------------------------
   # Database Tasks (SeaORM)
@@ -43,26 +29,20 @@ tasks:
     requires:
       vars: ["DATABASE_URL"]
 
+  db:seed:
+    desc: Seed the database with sample books, authors, and series
+    dir: "{{.DB_DIR}}"
+    cmds:
+      - psql "$DATABASE_URL" -f seed.sql
+    requires:
+      vars: ["DATABASE_URL"]
+
   # -----------------------------------------
   # Frontend Tasks (Flutter)
   # -----------------------------------------
-  frontend:dev:
-    desc: Run Flutter web app in development mode
-    dir: "{{.FLUTTER_DIR}}"
-    cmds:
-      - flutter run -d web-server --web-port={{.PORT}} --web-hostname=0.0.0.0
 
   frontend:build:
     desc: Build the Flutter web application for production
     dir: "{{.FLUTTER_DIR}}"
     cmds:
       - flutter build web --release
-
-  # -----------------------------------------
-  # Combined / Orchestration Tasks
-  # -----------------------------------------
-  dev:
-    desc: Run both Backend and Frontend simultaneously
-    deps:
-      - backend:watch
-      - frontend:dev

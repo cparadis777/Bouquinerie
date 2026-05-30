@@ -22,29 +22,31 @@ impl MigrationTrait for Migration {
                     .col(integer(Books::PageCount))
                     .col(string(Books::CoverPath))
                     .col(date(Books::PublishedDate))
-                    .col(timestamp(Books::CreatedAt))
-                    .col(timestamp(Books::UpdatedAt))
+                    .col(timestamp(Books::CreatedAt).extra("DEFAULT NOW()"))
+                    .col(timestamp(Books::UpdatedAt).extra("DEFAULT NOW()"))
                     .to_owned(),
             )
             .await?;
 
         // sort_title generated column (strips leading articles for natural sorting)
-        manager
-            .alter_table(
-                Table::alter()
-                    .table(Books::Table)
-                    .add_column(
-                        ColumnDef::new(Alias::new("sort_title"))
-                            .text()
-                            .not_null()
-                            .extra(
-                                "GENERATED ALWAYS AS \
-                                 (regexp_replace(title, '^(The |A |An )', '', 'i')) STORED",
-                            ),
-                    )
-                    .to_owned(),
-            )
-            .await?;
+        if !manager.has_column("books", "sort_title").await? {
+            manager
+                .alter_table(
+                    Table::alter()
+                        .table(Books::Table)
+                        .add_column(
+                            ColumnDef::new(Alias::new("sort_title"))
+                                .text()
+                                .not_null()
+                                .extra(
+                                    "GENERATED ALWAYS AS \
+                                     (regexp_replace(title, '^(The |A |An )', '', 'i')) STORED",
+                                ),
+                        )
+                        .to_owned(),
+                )
+                .await?;
+        }
 
         manager
             .create_table(
@@ -100,8 +102,8 @@ impl MigrationTrait for Migration {
                     .col(pk_uuid(Series::Id))
                     .col(string(Series::Name).not_null().unique_key())
                     .col(text(Series::Description))
-                    .col(timestamp(Series::CreatedAt))
-                    .col(timestamp(Series::UpdatedAt))
+                    .col(timestamp(Series::CreatedAt).extra("DEFAULT NOW()"))
+                    .col(timestamp(Series::UpdatedAt).extra("DEFAULT NOW()"))
                     .to_owned(),
             )
             .await?;
