@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
     Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize, utoipa :: ToSchema,
 )]
 #[sea_orm(table_name = "series")]
+#[schema(as = Series)]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,

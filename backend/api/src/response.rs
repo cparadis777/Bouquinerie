@@ -8,8 +8,26 @@ pub struct PaginationParams {
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct PaginatedResponse<T: Serialize> {
-    pub data: Vec<T>,
+pub struct BookListResponse {
+    pub data: Vec<db::entities::books::Model>,
+    pub total: u64,
+    pub page: u64,
+    pub pages: u64,
+    pub page_size: u64,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct AuthorListResponse {
+    pub data: Vec<db::entities::authors::Model>,
+    pub total: u64,
+    pub page: u64,
+    pub pages: u64,
+    pub page_size: u64,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct SeriesListResponse {
+    pub data: Vec<db::entities::series::Model>,
     pub total: u64,
     pub page: u64,
     pub pages: u64,

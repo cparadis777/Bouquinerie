@@ -6,7 +6,7 @@ use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
 
 use crate::error::AppError;
-use crate::response::{PaginatedResponse, PaginationParams};
+use crate::response::{AuthorListResponse, PaginationParams};
 
 #[instrument(skip(state))]
 #[utoipa::path(
@@ -14,13 +14,13 @@ use crate::response::{PaginatedResponse, PaginationParams};
     path = "/api/authors",
     params(PaginationParams),
     responses(
-        (status = 200, description = "List all authors", body = PaginatedResponse<authors::Model>)
+        (status = 200, description = "List all authors", body = AuthorListResponse)
     )
 )]
 pub async fn list_authors(
     State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
-) -> Result<Json<PaginatedResponse<authors::Model>>, AppError> {
+) -> Result<Json<AuthorListResponse>, AppError> {
     let page = params.page.unwrap_or(1).max(1);
     let page_size = params.page_size.unwrap_or(20).max(1).min(100);
 
@@ -32,7 +32,7 @@ pub async fn list_authors(
     let total = paginator.num_items().await?;
     let pages = paginator.num_pages().await?;
 
-    Ok(Json(PaginatedResponse {
+    Ok(Json(AuthorListResponse {
         data: items,
         total,
         page,

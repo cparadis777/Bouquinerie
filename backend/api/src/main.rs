@@ -35,9 +35,9 @@ mod response;
         db::entities::authors::Model,
         db::entities::series::Model,
         db::entities::identifiers::Model,
-        response::PaginatedResponse<db::entities::books::Model>,
-        response::PaginatedResponse<db::entities::authors::Model>,
-        response::PaginatedResponse<db::entities::series::Model>,
+        response::BookListResponse,
+        response::AuthorListResponse,
+        response::SeriesListResponse,
         response::BookResponse,
     )),
     info(

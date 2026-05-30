@@ -6,7 +6,7 @@ use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
 
 use crate::error::AppError;
-use crate::response::{PaginatedResponse, PaginationParams};
+use crate::response::{PaginationParams, SeriesListResponse};
 
 #[instrument(skip(state))]
 #[utoipa::path(
@@ -14,13 +14,13 @@ use crate::response::{PaginatedResponse, PaginationParams};
     path = "/api/series",
     params(PaginationParams),
     responses(
-        (status = 200, description = "List all series", body = PaginatedResponse<series::Model>)
+        (status = 200, description = "List all series", body = SeriesListResponse)
     )
 )]
 pub async fn list_series(
     State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
-) -> Result<Json<PaginatedResponse<series::Model>>, AppError> {
+) -> Result<Json<SeriesListResponse>, AppError> {
     let page = params.page.unwrap_or(1).max(1);
     let page_size = params.page_size.unwrap_or(20).max(1).min(100);
 
@@ -32,7 +32,7 @@ pub async fn list_series(
     let total = paginator.num_items().await?;
     let pages = paginator.num_pages().await?;
 
-    Ok(Json(PaginatedResponse {
+    Ok(Json(SeriesListResponse {
         data: items,
         total,
         page,
