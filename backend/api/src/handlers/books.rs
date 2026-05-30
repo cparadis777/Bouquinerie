@@ -7,7 +7,7 @@ use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error::AppError;
-use crate::response::{BookResponse, PaginatedResponse, PaginationParams};
+use crate::response::{BookListResponse, BookResponse, PaginationParams};
 
 #[instrument(skip(state))]
 #[utoipa::path(
@@ -15,13 +15,13 @@ use crate::response::{BookResponse, PaginatedResponse, PaginationParams};
     path = "/api/books",
     params(PaginationParams),
     responses(
-        (status = 200, description = "List all books", body = PaginatedResponse<books::Model>)
+        (status = 200, description = "List all books", body = BookListResponse)
     )
 )]
 pub async fn list_books(
     State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
-) -> Result<Json<PaginatedResponse<books::Model>>, AppError> {
+) -> Result<Json<BookListResponse>, AppError> {
     let page = params.page.unwrap_or(1).max(1);
     let page_size = params.page_size.unwrap_or(20).max(1).min(100);
 
@@ -33,7 +33,7 @@ pub async fn list_books(
     let total = paginator.num_items().await?;
     let pages = paginator.num_pages().await?;
 
-    Ok(Json(PaginatedResponse {
+    Ok(Json(BookListResponse {
         data: items,
         total,
         page,
