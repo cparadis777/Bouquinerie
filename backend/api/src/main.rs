@@ -1,38 +1,51 @@
 use std::net::SocketAddr;
 use std::path::Path;
+use std::time::Duration;
 
 use axum::{routing::get, Router};
 use db::{init_database, run_migrations, state::AppState};
 use tokio::net::TcpListener;
+use tower_http::classify::ServerErrorsFailureClass;
 use tower_http::cors::CorsLayer;
+use tower_http::request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetRequestIdLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
-use tracing::info;
+use tracing::{info, info_span, Span};
+use uuid::Uuid;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+mod error;
+mod health;
 mod handlers;
+mod logging;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(handlers::health_check),
+    paths(
+        health::health_check,
+        handlers::books::list_books,
+        handlers::books::get_book,
+        handlers::authors::list_authors,
+        handlers::series::list_series,
+    ),
+    components(schemas(
+        db::entities::books::Model,
+        db::entities::authors::Model,
+        db::entities::series::Model,
+        db::entities::identifiers::Model,
+    )),
     info(
-        title = "Boilerplate API",
+        title = "Bouquinerie",
         version = "0.1.0",
-        description = "A simple Axum API server"
+        description = "Ebook management platform"
     )
 )]
 struct ApiDoc;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "api=info,tower_http=info".into()),
-        )
-        .init();
-
+    logging::init_logging();
     dotenvy::dotenv().ok();
 
     let frontend_dist = std::env::var("FRONTEND_DIST").unwrap_or_else(|_| {
@@ -59,9 +72,54 @@ async fn main() {
     let state = AppState { db };
 
     let app = Router::new()
-        .route("/health", get(handlers::health_check))
+        .route("/health", get(health::health_check))
+        .route("/api/books", get(handlers::books::list_books))
+        .route("/api/books/{id}", get(handlers::books::get_book))
+        .route("/api/authors", get(handlers::authors::list_authors))
+        .route("/api/series", get(handlers::series::list_series))
+        .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(|req: &axum::http::Request<_>| {
+                    let request_id = req
+                        .headers()
+                        .get("x-request-id")
+                        .and_then(|v| v.to_str().ok())
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| Uuid::new_v4().to_string());
+                    info_span!(
+                        "http_request",
+                        method = %req.method(),
+                        uri = %req.uri().path(),
+                        request_id = %request_id,
+                    )
+                })
+                .on_response(
+                    |res: &axum::http::Response<_>, latency: Duration, _span: &Span| {
+                        let status = res.status().as_u16();
+                        let latency_ms = latency.as_millis() as u64;
+                        if status >= 500 {
+                            tracing::error!(status, latency_ms);
+                        } else if status >= 400 {
+                            tracing::warn!(status, latency_ms);
+                        } else {
+                            tracing::info!(status, latency_ms);
+                        }
+                    },
+                )
+                .on_failure(
+                    |_err: ServerErrorsFailureClass,
+                     latency: Duration,
+                     _span: &Span| {
+                        tracing::error!(
+                            latency_ms = latency.as_millis() as u64,
+                            "request failed"
+                        );
+                    },
+                ),
+        )
+        .layer(PropagateRequestIdLayer::x_request_id())
         .layer(CorsLayer::permissive())
-        .layer(TraceLayer::new_for_http())
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .with_state(state)
         .fallback_service(
