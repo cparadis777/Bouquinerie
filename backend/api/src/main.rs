@@ -2,6 +2,7 @@ use std::net::SocketAddr;
 use std::path::Path;
 
 use axum::{routing::get, Router};
+use db::{init_database, run_migrations, state::AppState};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tower_http::services::{ServeDir, ServeFile};
@@ -32,6 +33,8 @@ async fn main() {
         )
         .init();
 
+    dotenvy::dotenv().ok();
+
     let frontend_dist = std::env::var("FRONTEND_DIST").unwrap_or_else(|_| {
         let crate_dir = env!("CARGO_MANIFEST_DIR");
         format!("{crate_dir}/../../frontend/build/web")
@@ -40,16 +43,27 @@ async fn main() {
     info!("frontend dist path: {frontend_dist}");
     let path = Path::new(&frontend_dist);
     if path.exists() {
-        info!("frontend dist directory exists, contains index.html: {}", path.join("index.html").exists());
+        info!(
+            "frontend dist directory exists, contains index.html: {}",
+            path.join("index.html").exists()
+        );
     } else {
         info!("frontend dist directory does not exist");
     }
+
+    let database_url =
+        std::env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env or environment");
+    let db = init_database(&database_url).await;
+    run_migrations(&db).await;
+
+    let state = AppState { db };
 
     let app = Router::new()
         .route("/health", get(handlers::health_check))
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .with_state(state)
         .fallback_service(
             ServeDir::new(&frontend_dist)
                 .append_index_html_on_directories(true)
