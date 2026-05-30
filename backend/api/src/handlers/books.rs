@@ -1,29 +1,45 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::Json;
 use db::entities::{authors, books, identifiers, series};
 use db::state::AppState;
-use sea_orm::{EntityTrait, ModelTrait, QueryOrder};
+use sea_orm::{EntityTrait, ModelTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error::AppError;
+use crate::response::{BookResponse, PaginatedResponse, PaginationParams};
 
 #[instrument(skip(state))]
 #[utoipa::path(
     get,
     path = "/api/books",
+    params(PaginationParams),
     responses(
-        (status = 200, description = "List all books", body = Vec<books::Model>)
+        (status = 200, description = "List all books", body = PaginatedResponse<books::Model>)
     )
 )]
 pub async fn list_books(
     State(state): State<AppState>,
-) -> Result<Json<Vec<books::Model>>, AppError> {
-    let books = books::Entity::find()
+    Query(params): Query<PaginationParams>,
+) -> Result<Json<PaginatedResponse<books::Model>>, AppError> {
+    let page = params.page.unwrap_or(1).max(1);
+    let page_size = params.page_size.unwrap_or(20).max(1).min(100);
+
+    let paginator = books::Entity::find()
         .order_by_asc(books::Column::SortTitle)
-        .all(&state.db)
-        .await?;
-    Ok(Json(books))
+        .paginate(&state.db, page_size);
+
+    let items = paginator.fetch_page(page - 1).await?;
+    let total = paginator.num_items().await?;
+    let pages = paginator.num_pages().await?;
+
+    Ok(Json(PaginatedResponse {
+        data: items,
+        total,
+        page,
+        pages,
+        page_size,
+    }))
 }
 
 #[instrument(skip(state), fields(book_id = %id))]
@@ -31,14 +47,14 @@ pub async fn list_books(
     get,
     path = "/api/books/{id}",
     responses(
-        (status = 200, description = "Book with relations"),
+        (status = 200, description = "Book with relations", body = BookResponse),
         (status = 404, description = "Book not found")
     )
 )]
 pub async fn get_book(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
-) -> Result<Json<serde_json::Value>, AppError> {
+) -> Result<Json<BookResponse>, AppError> {
     let book = books::Entity::find_by_id(id)
         .one(&state.db)
         .await?
@@ -48,10 +64,10 @@ pub async fn get_book(
     let series = book.find_related(series::Entity).all(&state.db).await?;
     let identifiers = book.find_related(identifiers::Entity).all(&state.db).await?;
 
-    Ok(Json(serde_json::json!({
-        "book": book,
-        "authors": authors,
-        "series": series,
-        "identifiers": identifiers,
-    })))
+    Ok(Json(BookResponse {
+        book,
+        authors,
+        series,
+        identifiers,
+    }))
 }
