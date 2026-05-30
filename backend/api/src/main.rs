@@ -19,6 +19,7 @@ mod error;
 mod health;
 mod handlers;
 mod logging;
+mod response;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -34,6 +35,10 @@ mod logging;
         db::entities::authors::Model,
         db::entities::series::Model,
         db::entities::identifiers::Model,
+        response::PaginatedResponse<db::entities::books::Model>,
+        response::PaginatedResponse<db::entities::authors::Model>,
+        response::PaginatedResponse<db::entities::series::Model>,
+        response::BookResponse,
     )),
     info(
         title = "Bouquinerie",
