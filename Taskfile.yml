@@ -3,6 +3,7 @@ version: '3'
 vars:
   FLUTTER_DIR: frontend
   RUST_DIR: api
+  DB_DIR: backend/db
   PORT: 8080
 
 tasks:
@@ -25,6 +26,22 @@ tasks:
     dir: "{{.RUST_DIR}}"
     cmds:
       - cargo build --release
+
+  # -----------------------------------------
+  # Database Tasks (SeaORM)
+  # -----------------------------------------
+  db:cli:
+    desc: Install sea-orm-cli for code generation and migrations
+    cmds:
+      - cargo install sea-orm-cli
+
+  db:entities:
+    desc: Generate SeaORM entity files from the database schema
+    dir: "{{.DB_DIR}}"
+    cmds:
+      - sea-orm-cli generate entity -u "$DATABASE_URL" -o src/entities --with-serde both --model-extra-derives 'utoipa::ToSchema'
+    requires:
+      vars: ["DATABASE_URL"]
 
   # -----------------------------------------
   # Frontend Tasks (Flutter)
