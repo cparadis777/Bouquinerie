@@ -1,0 +1,7 @@
+**/target/
+**/.git/
+**/.env
+**/node_modules/
+frontend/.dart_tool/
+frontend/.packages
+frontend/build/  # Flutter web build is done inside Docker

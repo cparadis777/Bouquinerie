@@ -1,0 +1,32 @@
+{
+  "name": "Bouquinerie",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "root",
+  "containerUser": "root",
+  "features": {
+    "ghcr.io/danzilberdan/devcontainers/opencode:0": {}
+  },
+  "containerEnv": {
+    "DATABASE_URL": "postgres://bouquinerie:bouquinerie@postgres:5432/bouquinerie"
+  },
+  "postCreateCommand": "cargo install sea-orm-cli && cargo install cargo-watch",
+  "forwardPorts": [3000, 5432, 8080],
+  "portsAttributes": {
+    "3000": { "label": "Rust API", "protocol": "http" },
+    "5432": { "label": "PostgreSQL" },
+    "8080": { "label": "Flutter Web", "protocol": "http" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code",
+        "tamasfe.even-better-toml",
+        "task.vscode-task"
+      ]
+    }
+  }
+}
