@@ -1,3 +1,4 @@
+use db::entities::books;
 use serde::{Deserialize, Deserializer, Serialize};
 use utoipa::ToSchema;
 
@@ -10,28 +11,34 @@ where
     #[derive(Deserialize)]
     #[serde(untagged)]
     enum OneOf {
-        U64(u64),
-        Null(String),
+        Number(u64),
+        Text(String),
     }
 
     match OneOf::deserialize(deserializer)? {
-        OneOf::U64(v) => Ok(Some(v)),
-        OneOf::Null(s) if s == "null" || s.is_empty() => Ok(None),
-        OneOf::Null(s) => Err(de::Error::custom(format!("invalid value: {s}"))),
+        OneOf::Number(v) => Ok(Some(v)),
+        OneOf::Text(s) if s.is_empty() || s == "null" => Ok(None),
+        OneOf::Text(s) => s.parse::<u64>().map(Some).map_err(de::Error::custom),
     }
 }
 
 #[derive(Debug, Deserialize, utoipa::IntoParams)]
 pub struct PaginationParams {
-    #[serde(deserialize_with = "deserialize_nullable_u64")]
+    #[serde(default, deserialize_with = "deserialize_nullable_u64")]
     pub page: Option<u64>,
-    #[serde(deserialize_with = "deserialize_nullable_u64")]
+    #[serde(default, deserialize_with = "deserialize_nullable_u64")]
     pub page_size: Option<u64>,
 }
 
 #[derive(Serialize, ToSchema)]
+pub struct BookListEntry {
+    pub book: books::Model,
+    pub author_names: Vec<String>,
+}
+
+#[derive(Serialize, ToSchema)]
 pub struct BookListResponse {
-    pub data: Vec<db::entities::books::Model>,
+    pub data: Vec<BookListEntry>,
     pub total: u64,
     pub page: u64,
     pub pages: u64,

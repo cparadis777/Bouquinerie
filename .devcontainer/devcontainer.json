@@ -8,25 +8,29 @@
   "features": {
     "ghcr.io/danzilberdan/devcontainers/opencode:0": {}
   },
-  "containerEnv": {
-    "DATABASE_URL": "postgres://bouquinerie:bouquinerie@postgres:5432/bouquinerie"
-  },
+
   "postCreateCommand": "cargo install sea-orm-cli && cargo install cargo-watch",
   "forwardPorts": [3000, 5432, 8080],
   "portsAttributes": {
     "3000": { "label": "Rust API", "protocol": "http" },
-    "5432": { "label": "PostgreSQL" },
-    "8080": { "label": "Flutter Web", "protocol": "http" }
+    "5432": { "label": "PostgreSQL" }
   },
   "customizations": {
     "vscode": {
       "extensions": [
         "rust-lang.rust-analyzer",
-        "Dart-Code.flutter",
-        "Dart-Code.dart-code",
         "tamasfe.even-better-toml",
         "task.vscode-task"
       ]
     }
+  },
+  
+  "mounts": [
+    "source=~/.ssh/,target=/root/.ssh,type=bind,consistency=cached",
+    "source=${env:SSH_AUTH_SOCK},target=/tmp/ssh-agent.sock,type=bind"
+  ],
+
+  "containerEnv": {
+    "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock"
   }
 }
