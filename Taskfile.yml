@@ -43,3 +43,44 @@ tasks:
     dir: "{{.RUST_DIR}}/api"
     cmds:
       - cargo run --bin api
+
+  # -----------------------------------------
+  # Frontend Tasks (Vue + Vite)
+  # -----------------------------------------
+  frontend:install:
+    desc: Install npm dependencies
+    dir: web
+    cmds:
+      - npm install
+
+  frontend:dev:
+    desc: Start Vite dev server (proxies /api to Rust on :3000)
+    dir: web
+    cmds:
+      - npm run dev
+
+  frontend:build:
+    desc: Build Vue app for production (outputs to web/dist/)
+    dir: web
+    cmds:
+      - npm run build
+
+  frontend:preview:
+    desc: Preview the production build
+    dir: web
+    cmds:
+      - npm run preview
+
+  frontend:generate:api:
+    desc: Generate TypeScript types from the running API's OpenAPI spec
+    dir: web
+    cmds:
+      - npm run generate:api
+    requires:
+      vars: ["DATABASE_URL"]
+
+  frontend:lint:
+    desc: Run TypeScript type checking
+    dir: web
+    cmds:
+      - npx vue-tsc -b --noEmit
