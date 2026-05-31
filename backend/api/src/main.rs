@@ -74,7 +74,20 @@ async fn main() {
     let db = init_database(&database_url).await;
     run_migrations(&db).await;
 
-    let state = AppState { db };
+    let state = AppState { db: db.clone() };
+
+    let ingestion_cfg = ingestion::config::Config::from_env();
+    info!(
+        watched_dirs = ?ingestion_cfg.watched_dirs,
+        library_path = %ingestion_cfg.library_path.display(),
+        debounce_secs = ingestion_cfg.debounce_secs,
+        supported_formats = ?ingestion_cfg.supported_formats,
+        "ingestion config loaded"
+    );
+    let watcher_db = db.clone();
+    tokio::spawn(async move {
+        ingestion::watcher::start(watcher_db, ingestion_cfg).await;
+    });
 
     let app = Router::new()
         .route("/health", get(health::health_check))

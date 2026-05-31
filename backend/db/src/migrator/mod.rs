@@ -2,6 +2,7 @@ use sea_orm_migration::{MigratorTrait, MigrationTrait};
 
 mod m20260530_000001_create_core_tables;
 mod m20260531_000001_add_fk_indexes;
+mod m20260601_000001_add_book_files;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20260530_000001_create_core_tables::Migration),
             Box::new(m20260531_000001_add_fk_indexes::Migration),
+            Box::new(m20260601_000001_add_book_files::Migration),
         ]
     }
 }

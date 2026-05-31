@@ -5,7 +5,7 @@ pub fn init_logging() {
         EnvFilter::new(&level)
     } else {
         EnvFilter::try_from_default_env()
-            .unwrap_or_else(|_| EnvFilter::new("api=info,tower_http=info"))
+            .unwrap_or_else(|_| EnvFilter::new("api=info,ingestion=info,tower_http=info"))
     };
 
     let fmt = tracing_subscriber::fmt()
