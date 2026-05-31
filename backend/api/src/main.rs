@@ -1,5 +1,5 @@
 use std::net::SocketAddr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use axum::{routing::get, Router};
@@ -75,6 +75,10 @@ async fn main() {
     let db = init_database(&database_url).await;
     run_migrations(&db).await;
 
+    let library_path = std::env::var("LIBRARY_PATH")
+        .map(PathBuf::from)
+        .expect("LIBRARY_PATH must be set in .env or environment");
+
     let state = AppState { db: db.clone() };
 
     let ingestion_cfg = ingestion::config::Config::from_env();
@@ -96,6 +100,7 @@ async fn main() {
         .route("/api/books/{id}", get(handlers::books::get_book))
         .route("/api/authors", get(handlers::authors::list_authors))
         .route("/api/series", get(handlers::series::list_series))
+        .nest_service("/covers", ServeDir::new(&library_path))
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
         .layer(
             TraceLayer::new_for_http()

@@ -42,7 +42,13 @@ onMounted(async () => {
           class="book-card"
           @click="router.push(`/books/${entry.book.id}`)"
         >
-          <div class="cover-placeholder">
+          <img
+            v-if="entry.book.cover_path"
+            :src="`/covers/${entry.book.cover_path}`"
+            alt=""
+            class="cover-image"
+          />
+          <div v-else class="cover-placeholder">
             {{ entry.book.title.charAt(0).toUpperCase() }}
           </div>
           <div class="book-title">{{ entry.book.title }}</div>
@@ -88,6 +94,14 @@ onMounted(async () => {
 
 .book-card:hover {
   transform: translateY(-2px);
+}
+
+.cover-image {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-bottom: 8px;
 }
 
 .cover-placeholder {

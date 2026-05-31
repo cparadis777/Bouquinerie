@@ -1,4 +1,5 @@
 use std::path::{Component, Path, PathBuf};
+use itertools::Itertools;
 
 use sha2::{Digest, Sha256};
 use tokio::fs;
@@ -71,9 +72,7 @@ pub fn sanitize_filename(name: &str) -> String {
         })
         .collect();
 
-    while sanitized.contains("  ") {
-        sanitized = sanitized.replace("  ", " ");
-    }
+    sanitized = sanitized.split_whitespace().join(" "); 
     sanitized.truncate(200);
     sanitized.trim().to_string()
 }

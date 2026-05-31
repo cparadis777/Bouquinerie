@@ -1481,6 +1481,7 @@ dependencies = [
  "db",
  "epub",
  "hex",
+ "itertools",
  "notify",
  "sea-orm",
  "serde",

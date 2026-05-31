@@ -34,7 +34,13 @@ onMounted(loadBook)
 
     <template v-else-if="bookData">
       <div class="hero">
-        <div class="cover-placeholder">
+        <img
+          v-if="bookData.book.cover_path"
+          :src="`/covers/${bookData.book.cover_path}`"
+          alt=""
+          class="cover-image"
+        />
+        <div v-else class="cover-placeholder">
           {{ bookData.book.title.charAt(0).toUpperCase() }}
         </div>
         <div class="hero-text">
@@ -144,6 +150,14 @@ onMounted(loadBook)
   display: flex;
   gap: 28px;
   align-items: flex-start;
+}
+
+.cover-image {
+  width: 140px;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .cover-placeholder {

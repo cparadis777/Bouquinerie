@@ -71,7 +71,13 @@ onMounted(async () => {
             class="book-card"
             @click="router.push(`/books/${entry.book.id}`)"
           >
-            <div class="cover-placeholder">{{ entry.book.title.charAt(0).toUpperCase() }}</div>
+            <img
+              v-if="entry.book.cover_path"
+              :src="`/covers/${entry.book.cover_path}`"
+              alt=""
+              class="cover-image"
+            />
+            <div v-else class="cover-placeholder">{{ entry.book.title.charAt(0).toUpperCase() }}</div>
             <div class="book-info">
               <div class="book-title">{{ entry.book.title }}</div>
               <div class="book-author">{{ entry.author_names.join(', ') }}</div>
@@ -84,7 +90,13 @@ onMounted(async () => {
       <section class="section">
         <h2>Surprise Me</h2>
         <div v-if="surpriseBook" class="surprise-card" @click="router.push(`/books/${surpriseBook.book.id}`)">
-          <div class="cover-placeholder large">{{ surpriseBook.book.title.charAt(0).toUpperCase() }}</div>
+          <img
+            v-if="surpriseBook.book.cover_path"
+            :src="`/covers/${surpriseBook.book.cover_path}`"
+            alt=""
+            class="cover-image large"
+          />
+          <div v-else class="cover-placeholder large">{{ surpriseBook.book.title.charAt(0).toUpperCase() }}</div>
           <div>
             <div class="book-title">{{ surpriseBook.book.title }}</div>
             <div class="book-author">{{ surpriseBook.author_names.join(', ') }}</div>
@@ -146,6 +158,18 @@ onMounted(async () => {
 
 .book-card:hover {
   transform: translateY(-2px);
+}
+
+.cover-image {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+.cover-image.large {
+  width: 120px;
 }
 
 .cover-placeholder {
