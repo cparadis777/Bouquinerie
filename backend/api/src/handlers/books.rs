@@ -1,14 +1,17 @@
+use std::collections::HashMap;
+
 use axum::extract::{Path, Query, State};
 use axum::Json;
-use db::entities::{authors, books, identifiers, series};
+use db::entities::{authors, authors_books, books, identifiers, series};
 use db::state::AppState;
-use sea_orm::{EntityTrait, ModelTrait, PaginatorTrait, QueryOrder};
+use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, PaginatorTrait, QueryFilter, QueryOrder};
 use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::response::{
-    normalize_page, normalize_page_size, BookListResponse, BookResponse, PaginationParams,
+    normalize_page, normalize_page_size, BookListEntry, BookListResponse, BookResponse,
+    PaginationParams,
 };
 
 #[instrument(skip(state))]
@@ -34,8 +37,35 @@ pub async fn list_books(
     let total = paginator.num_items().await?;
     let pages = paginator.num_pages().await?;
 
+    let book_ids: Vec<Uuid> = items.iter().map(|b| b.id).collect();
+
+    let author_map: HashMap<Uuid, Vec<String>> = if book_ids.is_empty() {
+        HashMap::new()
+    } else {
+        authors_books::Entity::find()
+            .filter(authors_books::Column::BookId.is_in(book_ids))
+            .find_also_related(authors::Entity)
+            .all(&state.db)
+            .await?
+            .into_iter()
+            .fold(HashMap::new(), |mut map, (ab, author_opt)| {
+                if let Some(author) = author_opt {
+                    map.entry(ab.book_id).or_default().push(author.name);
+                }
+                map
+            })
+    };
+
+    let data: Vec<BookListEntry> = items
+        .into_iter()
+        .map(|book| {
+            let author_names = author_map.get(&book.id).cloned().unwrap_or_default();
+            BookListEntry { book, author_names }
+        })
+        .collect();
+
     Ok(Json(BookListResponse {
-        data: items,
+        data,
         total,
         page,
         pages,

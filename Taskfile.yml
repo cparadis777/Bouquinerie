@@ -1,17 +1,15 @@
 version: '3'
 
 vars:
-  FLUTTER_DIR: frontend
   RUST_DIR: backend
   DB_DIR: backend/db
-  PORT: 8080
+  FRONTEND_DIST: ../web/dist
 
 tasks:
   default:
     desc: List available tasks
     cmds:
       - task --list
-
 
   # -----------------------------------------
   # Database Tasks (SeaORM)
@@ -38,27 +36,10 @@ tasks:
       vars: ["DATABASE_URL"]
 
   # -----------------------------------------
-  # Frontend Tasks (Flutter)
+  # API Tasks
   # -----------------------------------------
-
-  frontend:build:
-    desc: Build the Flutter web application for production
-    dir: "{{.FLUTTER_DIR}}"
+  api:run:
+    desc: Run the Rust API server
+    dir: "{{.RUST_DIR}}/api"
     cmds:
-      - cd lib/api/generated && dart run build_runner build --delete-conflicting-outputs
-      - flutter build web --release
-
-  frontend:generate:
-    desc: Regenerate Dart client from OpenAPI spec (requires running server)
-    cmds:
-      - curl -s http://localhost:3000/api-docs/openapi.json -o "{{.FLUTTER_DIR}}/openapi.json"
-      - rm -rf "{{.FLUTTER_DIR}}/lib/api/generated"
-      - >-
-        java -jar /tmp/openapi-generator-cli.jar generate
-        -i "{{.FLUTTER_DIR}}/openapi.json"
-        -g dart-dio
-        -o "{{.FLUTTER_DIR}}/lib/api/generated"
-        --additional-properties=pubName=api_client,serializationLibrary=json_serializable
-        --skip-validate-spec
-      - "sed -i \"s/sdk: '>=3.5.0 <4.0.0'/sdk: '>=3.12.0 <4.0.0'/\" \"{{.FLUTTER_DIR}}/lib/api/generated/pubspec.yaml\""
-      - cd "{{.FLUTTER_DIR}}/lib/api/generated" && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+      - cargo run --bin api

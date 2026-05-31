@@ -36,6 +36,7 @@ mod response;
         db::entities::series::Model,
         db::entities::identifiers::Model,
         response::BookListResponse,
+        response::BookListEntry,
         response::AuthorListResponse,
         response::SeriesListResponse,
         response::BookResponse,
@@ -55,7 +56,7 @@ async fn main() {
 
     let frontend_dist = std::env::var("FRONTEND_DIST").unwrap_or_else(|_| {
         let crate_dir = env!("CARGO_MANIFEST_DIR");
-        format!("{crate_dir}/../../frontend/build/web")
+        format!("{crate_dir}/../../web/dist")
     });
 
     info!("frontend dist path: {frontend_dist}");
@@ -139,12 +140,19 @@ async fn main() {
         .layer(PropagateRequestIdLayer::x_request_id())
         .layer(CorsLayer::permissive())
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .with_state(state)
-        .fallback_service(
+        .with_state(state);
+
+    let app = if path.exists() {
+        info!("serving frontend from {frontend_dist}");
+        app.fallback_service(
             ServeDir::new(&frontend_dist)
                 .append_index_html_on_directories(true)
                 .fallback(ServeFile::new(format!("{frontend_dist}/index.html"))),
-        );
+        )
+    } else {
+        info!("no frontend dist found at {frontend_dist}, API only");
+        app
+    };
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let listener = TcpListener::bind(addr).await.unwrap();
