@@ -2,6 +2,7 @@
 
 pub use super::authors::Entity as Authors;
 pub use super::authors_books::Entity as AuthorsBooks;
+pub use super::book_files::Entity as BookFiles;
 pub use super::books::Entity as Books;
 pub use super::identifiers::Entity as Identifiers;
 pub use super::series::Entity as Series;

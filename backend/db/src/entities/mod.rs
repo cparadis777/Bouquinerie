@@ -4,6 +4,7 @@ pub mod prelude;
 
 pub mod authors;
 pub mod authors_books;
+pub mod book_files;
 pub mod books;
 pub mod identifiers;
 pub mod series;

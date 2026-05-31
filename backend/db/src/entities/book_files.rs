@@ -4,26 +4,21 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize, utoipa :: ToSchema,
 )]
-#[sea_orm(table_name = "authors_books")]
+#[sea_orm(table_name = "book_files")]
+#[schema(as = BookFile)]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
+    pub id: Uuid,
     pub book_id: Uuid,
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub author_id: Uuid,
-    pub sort_order: i32,
-    pub is_primary: bool,
+    pub medium: String,
+    pub file_path: String,
+    pub format: Option<String>,
+    pub file_hash: Option<String>,
+    pub size_bytes: Option<i64>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::authors::Entity",
-        from = "Column::AuthorId",
-        to = "super::authors::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Authors,
     #[sea_orm(
         belongs_to = "super::books::Entity",
         from = "Column::BookId",
@@ -32,12 +27,6 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Books,
-}
-
-impl Related<super::authors::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Authors.def()
-    }
 }
 
 impl Related<super::books::Entity> for Entity {
