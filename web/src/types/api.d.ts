@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/authors/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_author"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/books": {
         parameters: {
             query?: never;
@@ -60,6 +76,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["list_series"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/series/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_series"];
         put?: never;
         post?: never;
         delete?: never;
@@ -211,11 +243,42 @@ export interface operations {
             };
         };
     };
+    get_author: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Author by ID */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Author"];
+                };
+            };
+            /** @description Author not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     list_books: {
         parameters: {
             query?: {
                 page?: number | null;
                 page_size?: number | null;
+                author_id?: string | null;
+                series_id?: string | null;
             };
             header?: never;
             path?: never;
@@ -283,6 +346,35 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SeriesListResponse"];
                 };
+            };
+        };
+    };
+    get_series: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Series by ID */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Series"];
+                };
+            };
+            /** @description Series not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

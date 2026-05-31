@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import type { components } from '../types/api'
 import { api } from '../api/client'
 
 const router = useRouter()
+const route = useRoute()
 
 const authorName = ref('')
 const books = ref<components["schemas"]["BookListEntry"][]>([])
 const loading = ref(true)
 
 onMounted(async () => {
-  // TODO: use GET /api/authors/{id}/books when backend endpoint is available
-  const res = await api.GET('/api/books', {
-    params: { query: { page: 1, page_size: 100 } },
-  })
+  const id = route.params.id as string
 
-  if (res.data) {
-    books.value = res.data.data
-    authorName.value = 'Author'
+  const [authorRes, booksRes] = await Promise.all([
+    api.GET('/api/authors/{id}', { params: { path: { id } } }),
+    api.GET('/api/books', { params: { query: { author_id: id, page: 1, page_size: 100 } } }),
+  ])
+
+  if (authorRes.data) {
+    authorName.value = authorRes.data.name
+  }
+  if (booksRes.data) {
+    books.value = booksRes.data.data
   }
 
   loading.value = false

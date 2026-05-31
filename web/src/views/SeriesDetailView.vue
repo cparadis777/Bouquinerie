@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { api } from '../api/client'
 import type { components } from '../types/api'
 
 const router = useRouter()
+const route = useRoute()
 
 const seriesName = ref('')
 const books = ref<components["schemas"]["BookListEntry"][]>([])
 const loading = ref(true)
 
 onMounted(async () => {
-  // Stub: fetch all books until the backend has GET /api/series/{id}/books
-  const res = await api.GET('/api/books', {
-    params: { query: { page: 1, page_size: 100 } },
-  })
+  const id = route.params.id as string
 
-  if (res.data) {
-    books.value = res.data.data
-    seriesName.value = 'Series'
+  const [seriesRes, booksRes] = await Promise.all([
+    api.GET('/api/series/{id}', { params: { path: { id } } }),
+    api.GET('/api/books', { params: { query: { series_id: id, page: 1, page_size: 100 } } }),
+  ])
+
+  if (seriesRes.data) {
+    seriesName.value = seriesRes.data.name
+  }
+  if (booksRes.data) {
+    books.value = booksRes.data.data
   }
 
   loading.value = false
@@ -37,12 +42,20 @@ onMounted(async () => {
 
       <div class="list" v-if="books.length">
         <div
-          v-for="(entry, idx) in books"
+          v-for="(entry, _idx) in books"
           :key="entry.book.id"
           class="series-book"
           @click="router.push(`/books/${entry.book.id}`)"
         >
-          <span class="position">#{{ idx + 1 }}</span>
+          <img
+            v-if="entry.book.cover_path"
+            :src="`/covers/${entry.book.cover_path}`"
+            alt=""
+            class="cover-image"
+          />
+          <div v-else class="cover-placeholder">
+            {{ entry.book.title.charAt(0).toUpperCase() }}
+          </div>
           <div class="book-info">
             <div class="book-title">{{ entry.book.title }}</div>
             <div class="caption">{{ entry.author_names.join(', ') }}</div>
@@ -96,6 +109,28 @@ onMounted(async () => {
 
 .series-book:hover {
   background: var(--surface-hover);
+}
+
+.cover-image {
+  width: 48px;
+  height: 72px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cover-placeholder {
+  width: 48px;
+  height: 72px;
+  border-radius: 4px;
+  background: var(--placeholder-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--placeholder-fg);
+  flex-shrink: 0;
 }
 
 .position {

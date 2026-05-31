@@ -1,6 +1,7 @@
 use db::entities::books;
 use serde::{Deserialize, Deserializer, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 fn deserialize_nullable_u64<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
 where
@@ -28,6 +29,16 @@ pub struct PaginationParams {
     pub page: Option<u64>,
     #[serde(default, deserialize_with = "deserialize_nullable_u64")]
     pub page_size: Option<u64>,
+}
+
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+pub struct BookQueryParams {
+    #[serde(default, deserialize_with = "deserialize_nullable_u64")]
+    pub page: Option<u64>,
+    #[serde(default, deserialize_with = "deserialize_nullable_u64")]
+    pub page_size: Option<u64>,
+    pub author_id: Option<Uuid>,
+    pub series_id: Option<Uuid>,
 }
 
 #[derive(Serialize, ToSchema)]
