@@ -139,9 +139,13 @@ pub async fn ingest(
     if let Some(cover_data) = meta.cover_data {
         match library::save_cover(&book_dir, &cover_data).await {
             Ok(cover_path) => {
-                let cover_str = cover_path.to_string_lossy().to_string();
+                let cover_rel = cover_path
+                    .strip_prefix(&config.library_path)
+                    .unwrap_or(&cover_path)
+                    .to_string_lossy()
+                    .to_string();
                 let _ = books::Entity::update_many()
-                    .col_expr(books::Column::CoverPath, cover_str.into())
+                    .col_expr(books::Column::CoverPath, cover_rel.into())
                     .filter(books::Column::Id.eq(book_id))
                     .exec(db)
                     .await;
