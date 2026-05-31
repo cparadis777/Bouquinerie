@@ -1,9 +1,10 @@
-use axum::extract::{Query, State};
+use axum::extract::{Path, Query, State};
 use axum::Json;
 use db::entities::series;
 use db::state::AppState;
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
+use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::response::{normalize_page, normalize_page_size, PaginationParams, SeriesListResponse};
@@ -38,4 +39,25 @@ pub async fn list_series(
         pages,
         page_size,
     }))
+}
+
+#[instrument(skip(state), fields(series_id = %id))]
+#[utoipa::path(
+    get,
+    path = "/api/series/{id}",
+    responses(
+        (status = 200, description = "Series by ID", body = db::entities::series::Model),
+        (status = 404, description = "Series not found")
+    )
+)]
+pub async fn get_series(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<series::Model>, AppError> {
+    let series = series::Entity::find_by_id(id)
+        .one(&state.db)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Series not found".into()))?;
+
+    Ok(Json(series))
 }

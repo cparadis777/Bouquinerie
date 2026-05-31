@@ -1,9 +1,10 @@
-use axum::extract::{Query, State};
+use axum::extract::{Path, Query, State};
 use axum::Json;
 use db::entities::authors;
 use db::state::AppState;
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
+use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::response::{
@@ -40,4 +41,25 @@ pub async fn list_authors(
         pages,
         page_size,
     }))
+}
+
+#[instrument(skip(state), fields(author_id = %id))]
+#[utoipa::path(
+    get,
+    path = "/api/authors/{id}",
+    responses(
+        (status = 200, description = "Author by ID", body = db::entities::authors::Model),
+        (status = 404, description = "Author not found")
+    )
+)]
+pub async fn get_author(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<authors::Model>, AppError> {
+    let author = authors::Entity::find_by_id(id)
+        .one(&state.db)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Author not found".into()))?;
+
+    Ok(Json(author))
 }

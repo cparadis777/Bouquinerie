@@ -28,7 +28,9 @@ mod response;
         handlers::books::list_books,
         handlers::books::get_book,
         handlers::authors::list_authors,
+        handlers::authors::get_author,
         handlers::series::list_series,
+        handlers::series::get_series,
     ),
     components(schemas(
         db::entities::books::Model,
@@ -99,7 +101,9 @@ async fn main() {
         .route("/api/books", get(handlers::books::list_books))
         .route("/api/books/{id}", get(handlers::books::get_book))
         .route("/api/authors", get(handlers::authors::list_authors))
+        .route("/api/authors/{id}", get(handlers::authors::get_author))
         .route("/api/series", get(handlers::series::list_series))
+        .route("/api/series/{id}", get(handlers::series::get_series))
         .nest_service("/covers", ServeDir::new(&library_path))
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
         .layer(

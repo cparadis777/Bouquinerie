@@ -10,7 +10,6 @@ const bookCount = ref(0)
 const authorCount = ref(0)
 const seriesCount = ref(0)
 const recentBooks = ref<components["schemas"]["BookListEntry"][]>([])
-const surpriseBook = ref<components["schemas"]["BookListEntry"] | null>(null)
 const loading = ref(true)
 
 async function fetchStats() {
@@ -32,19 +31,11 @@ async function fetchStats() {
   }
 }
 
-async function fetchSurprise() {
-  const res = await api.GET('/api/books', {
-    params: { query: { page: 1, page_size: 100 } },
-  })
-  if (res.data && res.data.data.length > 0) {
-    const idx = Math.floor(Math.random() * res.data.data.length)
-    surpriseBook.value = res.data.data[idx]
-  }
-}
+
 
 onMounted(async () => {
   loading.value = true
-  await Promise.all([fetchStats(), fetchSurprise()])
+  await Promise.all([fetchStats()])
   loading.value = false
 })
 </script>
@@ -87,23 +78,6 @@ onMounted(async () => {
         <div v-else class="empty">No books yet.</div>
       </section>
 
-      <section class="section">
-        <h2>Surprise Me</h2>
-        <div v-if="surpriseBook" class="surprise-card" @click="router.push(`/books/${surpriseBook.book.id}`)">
-          <img
-            v-if="surpriseBook.book.cover_path"
-            :src="`/covers/${surpriseBook.book.cover_path}`"
-            alt=""
-            class="cover-image large"
-          />
-          <div v-else class="cover-placeholder large">{{ surpriseBook.book.title.charAt(0).toUpperCase() }}</div>
-          <div>
-            <div class="book-title">{{ surpriseBook.book.title }}</div>
-            <div class="book-author">{{ surpriseBook.author_names.join(', ') }}</div>
-          </div>
-        </div>
-        <div v-else class="empty">No books yet.</div>
-      </section>
     </template>
   </div>
 </template>
