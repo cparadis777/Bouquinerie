@@ -1,3 +1,18 @@
+@font-face {
+  font-family: 'Crimson Pro';
+  src: url('/fonts/CrimsonPro-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Crimson Pro';
+  src: url('/fonts/CrimsonPro-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --surface: #191512;
   --surface-elevated: #241E18;
@@ -22,7 +37,7 @@
   --error: #B84A4A;
   --info: #5A8AAA;
 
-  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-heading: 'Crimson Pro', Georgia, serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
   font-family: var(--font-body);

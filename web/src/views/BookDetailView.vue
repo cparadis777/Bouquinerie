@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { CollapsibleRoot as Collapsible, CollapsibleTrigger, CollapsibleContent } from 'reka-ui'
+import AppButton from '../components/AppButton.vue'
 import { api } from '../api/client'
 import type { components } from '../types/api'
 
@@ -28,7 +30,7 @@ onMounted(loadBook)
 
 <template>
   <div class="detail">
-    <button class="back" @click="router.push('/books')">← Back to Books</button>
+    <AppButton variant="ghost" @click="router.push('/books')">← Back to Books</AppButton>
 
     <div v-if="loading" class="loading">Loading...</div>
 
@@ -54,16 +56,17 @@ onMounted(loadBook)
       </div>
 
       <section class="section">
-        <p class="description" :class="{ expanded: descExpanded }">
-          {{ bookData.book.description || 'No description.' }}
-        </p>
-        <button
-          v-if="bookData.book.description.length > 200"
-          class="expand-btn"
-          @click="descExpanded = !descExpanded"
-        >
-          {{ descExpanded ? 'Show less' : 'Show more' }}
-        </button>
+        <Collapsible v-model:open="descExpanded" :unmount-on-hide="false">
+          <CollapsibleContent as="p" class="description">
+            {{ bookData.book.description || 'No description.' }}
+          </CollapsibleContent>
+          <CollapsibleTrigger
+            v-if="bookData.book.description.length > 200"
+            class="expand-btn"
+          >
+            {{ descExpanded ? 'Show less' : 'Show more' }}
+          </CollapsibleTrigger>
+        </Collapsible>
       </section>
 
       <section class="section metadata">
@@ -131,13 +134,6 @@ onMounted(loadBook)
   flex-direction: column;
   gap: 28px;
   max-width: 700px;
-}
-
-.back {
-  align-self: flex-start;
-  color: var(--primary);
-  font-size: 13px;
-  padding: 4px 0;
 }
 
 .loading {
@@ -210,13 +206,6 @@ onMounted(loadBook)
 
 .description {
   line-height: 1.7;
-  max-height: 4.8em;
-  overflow: hidden;
-  transition: max-height 0.2s;
-}
-
-.description.expanded {
-  max-height: none;
 }
 
 .expand-btn {
