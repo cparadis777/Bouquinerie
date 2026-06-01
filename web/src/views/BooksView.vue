@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { PaginationRoot, PaginationPrev, PaginationNext, PaginationList, PaginationListItem, PaginationEllipsis } from 'reka-ui'
 import { api } from '../api/client'
 import { useRouter } from 'vue-router'
 import type { components } from '../types/api'
@@ -9,23 +10,24 @@ const router = useRouter()
 const books = ref<components["schemas"]["BookListEntry"][]>([])
 const total = ref(0)
 const page = ref(1)
-const pages = ref(0)
 const loading = ref(true)
+const pageSize = 20
+const pages = computed(() => Math.ceil(total.value / pageSize))
 
-async function loadBooks(p: number = 1) {
+async function loadBooks() {
   loading.value = true
   const res = await api.GET('/api/books', {
-    params: { query: { page: p, page_size: 20 } },
+    params: { query: { page: page.value, page_size: pageSize } },
   })
   if (res.data) {
     books.value = res.data.data
     total.value = res.data.total
     page.value = res.data.page
-    pages.value = res.data.pages
   }
   loading.value = false
 }
 
+watch(page, loadBooks)
 onMounted(() => loadBooks())
 
 function placeholderTint(index: number): string {
@@ -75,21 +77,29 @@ function placeholderTint(index: number): string {
         </div>
       </div>
 
-      <div class="pagination" v-if="pages > 1">
-        <button
-          :disabled="page <= 1"
-          @click="loadBooks(page - 1)"
-        >
-          Previous
-        </button>
+      <PaginationRoot
+        v-if="pages > 1"
+        v-model:page="page"
+        :items-per-page="pageSize"
+        :total="total"
+        :sibling-count="2"
+        class="pagination"
+      >
+        <PaginationPrev class="pagination-btn">Previous</PaginationPrev>
+        <PaginationList v-slot="{ items }">
+          <template v-for="item in items">
+            <PaginationListItem
+              v-if="item.type === 'page'"
+              :key="item.value"
+              :value="item.value"
+              class="pagination-btn"
+            />
+            <PaginationEllipsis v-else :key="item.type" />
+          </template>
+        </PaginationList>
         <span class="caption">Page {{ page }} of {{ pages }}</span>
-        <button
-          :disabled="page >= pages"
-          @click="loadBooks(page + 1)"
-        >
-          Next
-        </button>
-      </div>
+        <PaginationNext class="pagination-btn">Next</PaginationNext>
+      </PaginationRoot>
     </template>
 
     <div v-else class="empty">No books found.</div>
@@ -164,26 +174,34 @@ function placeholderTint(index: number): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   padding: 16px 0;
 }
 
-.pagination button {
-  padding: 8px 16px;
+.pagination-btn {
+  padding: 8px 12px;
   background: var(--surface-elevated);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text);
+  font-family: var(--font-body);
   font-size: 13px;
+  cursor: pointer;
   transition: background 0.15s;
 }
 
-.pagination button:hover:not(:disabled) {
+.pagination-btn:hover:not(:disabled) {
   background: var(--surface-hover);
 }
 
-.pagination button:disabled {
+.pagination-btn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+.pagination-btn[data-selected="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface);
 }
 </style>

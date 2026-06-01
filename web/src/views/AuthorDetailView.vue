@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { components } from '../types/api'
+import AppButton from '../components/AppButton.vue'
 import { api } from '../api/client'
 
 const router = useRouter()
@@ -32,7 +33,7 @@ onMounted(async () => {
 
 <template>
   <div class="author-detail">
-    <button class="back" @click="router.push('/authors')">← Back to Authors</button>
+    <AppButton variant="ghost" @click="router.push('/authors')">← Back to Authors</AppButton>
 
     <div v-if="loading" class="loading">Loading...</div>
 
@@ -71,13 +72,6 @@ onMounted(async () => {
   flex-direction: column;
   gap: 20px;
   max-width: 700px;
-}
-
-.back {
-  align-self: flex-start;
-  color: var(--primary);
-  font-size: 13px;
-  padding: 4px 0;
 }
 
 .loading, .empty {
