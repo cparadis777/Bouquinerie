@@ -1,0 +1,34 @@
+# Version control
+.git/
+.gitignore
+
+# Local build artifacts (Rust)
+target/
+backend/**/target/
+
+# Local build artifacts (frontend)
+dist/
+web/dist/
+web/node_modules/
+
+# Task runner cache
+.task/
+
+# Runtime data
+incoming/
+library/
+
+# Secrets and local config
+.env
+.env*
+
+# Devcontainer
+.devcontainer/
+
+# Documentation
+*.md
+!README.md
+
+# OS files
+.DS_Store
+Thumbs.db
