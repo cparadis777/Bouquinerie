@@ -5,9 +5,7 @@
   "workspaceFolder": "/workspace",
   "remoteUser": "root",
   "containerUser": "root",
-  "features": {
-    "ghcr.io/danzilberdan/devcontainers/opencode:0": {}
-  },
+  "features": {},
 
   "postCreateCommand": "cargo install sea-orm-cli && cargo install cargo-watch",
   "forwardPorts": [3000, 5432, 8080],
