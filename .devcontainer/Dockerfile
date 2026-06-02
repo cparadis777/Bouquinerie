@@ -17,5 +17,10 @@ RUN mkdir -p "$NVM_DIR" \
   && ln -sf "$NVM_DIR/versions/node/$(ls $NVM_DIR/versions/node/)/bin/npm" /usr/local/bin/npm \
   && ln -sf "$NVM_DIR/versions/node/$(ls $NVM_DIR/versions/node/)/bin/npx" /usr/local/bin/npx
 
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash \
+  && ln -sf /root/.bun/bin/bun /usr/local/bin/bun \
+  && ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx
+
 # Verify
-RUN node -v && npm -v && task --version
+RUN node -v && npm -v && bun --version && task --version
