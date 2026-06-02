@@ -3,6 +3,6 @@
 members = [
     "backend/api",
     "backend/db",
-    "backend/ingestion",
+    "backend/ingestion", "backend/repository",
 ]
 resolver = "2"

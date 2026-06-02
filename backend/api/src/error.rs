@@ -14,6 +14,9 @@ pub enum AppError {
     #[error(transparent)]
     Database(#[from] sea_orm::DbErr),
 
+    #[error(transparent)]
+    Repository(#[from] repository::error::RepositoryError),
+
     #[error("Internal error: {0}")]
     Internal(String),
 }
@@ -33,6 +36,13 @@ impl IntoResponse for AppError {
             AppError::Internal(msg) => {
                 tracing::error!(?self, "internal error");
                 (StatusCode::INTERNAL_SERVER_ERROR, msg.clone())
+            }
+            AppError::Repository(err) => {
+                tracing::error!(?err, "repository error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "An internal error occurred".to_string(),
+                )
             }
         };
 
