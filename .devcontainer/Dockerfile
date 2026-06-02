@@ -22,5 +22,8 @@ RUN curl -fsSL https://bun.sh/install | bash \
   && ln -sf /root/.bun/bin/bun /usr/local/bin/bun \
   && ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx
 
+# Install prek (Rust-native pre-commit)
+RUN cargo install prek
+
 # Verify
-RUN node -v && npm -v && bun --version && task --version
+RUN node -v && npm -v && bun --version && task --version && prek --version

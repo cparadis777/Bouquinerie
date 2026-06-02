@@ -15,7 +15,7 @@ RUN bun run build
 # ============================================================
 # Stage 2 — Build the Rust API binary (fully static MUSL)
 # ============================================================
-FROM rust:1.85-alpine3.21 AS rust-builder
+FROM rust:1.96-alpine3.21 AS rust-builder
 
 WORKDIR /app
 

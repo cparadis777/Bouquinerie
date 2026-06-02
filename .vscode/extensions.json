@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "Vue.volar",
+    "tamasfe.even-better-toml",
+    "editorconfig.editorconfig",
+    "bierner.github-markdown-preview"
+  ]
+}
