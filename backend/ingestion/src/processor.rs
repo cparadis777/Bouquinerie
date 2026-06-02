@@ -89,9 +89,9 @@ pub async fn ingest(
         created_at: Set(now),
         updated_at: Set(now),
         sort_title: NotSet,
-        book_path: Set(Some(rel_path_str)),
-        file_hash: Set(Some(file_hash.clone())),
-        size_bytes: Set(Some(size)),
+        book_path: Set(rel_path_str),
+        file_hash: Set(file_hash.clone()),
+        size_bytes: Set(size),
     };
     book.insert(&txn).await?;
 
@@ -112,9 +112,9 @@ pub async fn ingest(
         book_id: Set(book_id),
         medium: Set(meta.medium.as_str().to_string()),
         file_path: Set(filename.to_string()),
-        format: Set(Some(meta.format)),
-        file_hash: Set(Some(file_hash)),
-        size_bytes: Set(Some(size)),
+        format: Set(meta.format),
+        file_hash: Set(file_hash),
+        size_bytes: Set(size),
     };
     bf.insert(&txn).await?;
 
