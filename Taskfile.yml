@@ -28,13 +28,6 @@ tasks:
     requires:
       vars: ["DATABASE_URL"]
 
-  db:seed:
-    desc: Seed the database with sample books, authors, and series
-    dir: "{{.DB_DIR}}"
-    cmds:
-      - psql "$DATABASE_URL" -f seed.sql
-    requires:
-      vars: ["DATABASE_URL"]
 
   # -----------------------------------------
   # API Tasks

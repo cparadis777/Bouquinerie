@@ -1489,7 +1489,6 @@ name = "ingestion"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "db",
  "domain",
  "epub",
  "hex",
@@ -2299,9 +2298,9 @@ name = "repository"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "chrono",
  "domain",
  "sea-orm",
+ "thiserror",
  "uuid",
 ]
 

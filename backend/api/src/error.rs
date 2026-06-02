@@ -1,6 +1,7 @@
 use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use repository::error::RepositoryError;
 
 #[derive(Debug, thiserror::Error)]
 #[expect(dead_code)]
@@ -37,13 +38,27 @@ impl IntoResponse for AppError {
                 tracing::error!(?self, "internal error");
                 (StatusCode::INTERNAL_SERVER_ERROR, msg.clone())
             }
-            AppError::Repository(err) => {
-                tracing::error!(?err, "repository error");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "An internal error occurred".to_string(),
-                )
-            }
+            AppError::Repository(err) => match &err {
+                RepositoryError::NotFound(msg) => {
+                    tracing::warn!(?err, "resource not found");
+                    (StatusCode::NOT_FOUND, msg.clone())
+                }
+                RepositoryError::Database(dbe) => {
+                    tracing::error!(?dbe, "database error");
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "A database error occured".to_string(),
+                    )
+                }
+                #[cfg(feature = "mock")]
+                RepositoryError::Mock(msg) => {
+                    tracing::error!(?msg, "mock error");
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "An internal error occured".to_string(),
+                    )
+                }
+            },
         };
 
         (status, Json(serde_json::json!({ "error": message }))).into_response()

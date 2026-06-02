@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use std::collections::HashMap;
 use uuid::Uuid;
 
 use domain::entities::{
@@ -6,7 +7,7 @@ use domain::entities::{
     series::Model as Series,
 };
 
-use super::{BookListParams, BookRepository};
+use super::{BookListParams, BookListResult, BookRepository};
 use crate::error::RepositoryError;
 
 pub struct MockBookRepository {
@@ -38,7 +39,7 @@ impl BookRepository for MockBookRepository {
         Ok(self.books.iter().find(|b| b.id == id).cloned())
     }
 
-    async fn list(&self, params: BookListParams) -> Result<(Vec<Book>, u64), RepositoryError> {
+    async fn list(&self, params: BookListParams) -> Result<BookListResult, RepositoryError> {
         if self.should_fail {
             return Err(RepositoryError::Mock("forced failure"));
         }
@@ -51,24 +52,29 @@ impl BookRepository for MockBookRepository {
             .take(params.page_size as usize)
             .cloned()
             .collect();
-        Ok((items, total))
+
+        Ok(BookListResult {
+            items,
+            author_names: HashMap::new(),
+            total,
+        })
     }
 
-    async fn find_authors(&self, _book_id: Uuid) -> Result<Vec<Author>, RepositoryError> {
+    async fn find_authors(&self, _book: &Book) -> Result<Vec<Author>, RepositoryError> {
         if self.should_fail {
             return Err(RepositoryError::Mock("forced failure"));
         }
         Ok(self.authors.clone())
     }
 
-    async fn find_series(&self, _book_id: Uuid) -> Result<Vec<Series>, RepositoryError> {
+    async fn find_series(&self, _book: &Book) -> Result<Vec<Series>, RepositoryError> {
         if self.should_fail {
             return Err(RepositoryError::Mock("forced failure"));
         }
         Ok(self.series.clone())
     }
 
-    async fn find_identifiers(&self, _book_id: Uuid) -> Result<Vec<Identifier>, RepositoryError> {
+    async fn find_identifiers(&self, _book: &Book) -> Result<Vec<Identifier>, RepositoryError> {
         if self.should_fail {
             return Err(RepositoryError::Mock("forced failure"));
         }

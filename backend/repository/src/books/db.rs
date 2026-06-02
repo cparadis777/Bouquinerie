@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_trait::async_trait;
 use sea_orm::{
     ColumnTrait, ConnectionTrait, EntityTrait, ModelTrait, PaginatorTrait, QueryFilter, QueryOrder,
@@ -10,7 +12,7 @@ use domain::entities::{
 };
 
 use super::{BookListParams, BookRepository};
-use crate::error::RepositoryError;
+use super::{BookListResult, RepositoryError};
 
 pub struct DbBookRepository<'a, C: ConnectionTrait> {
     db: &'a C,
@@ -28,7 +30,7 @@ impl<'a, C: ConnectionTrait + Send + Sync> BookRepository for DbBookRepository<'
         Ok(books::Entity::find_by_id(id).one(self.db).await?)
     }
 
-    async fn list(&self, params: BookListParams) -> Result<(Vec<Book>, u64), RepositoryError> {
+    async fn list(&self, params: BookListParams) -> Result<BookListResult, RepositoryError> {
         let mut query = books::Entity::find().order_by_asc(books::Column::SortTitle);
 
         if let Some(author_id) = params.author_id {
@@ -57,30 +59,43 @@ impl<'a, C: ConnectionTrait + Send + Sync> BookRepository for DbBookRepository<'
         let items = paginator.fetch_page(params.page - 1).await?;
         let total = paginator.num_items().await?;
 
-        Ok((items, total))
+        let book_ids: Vec<Uuid> = items.iter().map(|b| b.id).collect();
+        let author_names = if book_ids.is_empty() {
+            HashMap::new()
+        } else {
+            authors_books::Entity::find()
+                .filter(authors_books::Column::BookId.is_in(book_ids))
+                .find_also_related(authors::Entity)
+                .all(self.db)
+                .await?
+                .into_iter()
+                .fold(
+                    HashMap::new(),
+                    |mut map: HashMap<Uuid, Vec<String>>, (ab, author_opt)| {
+                        if let Some(author) = author_opt {
+                            map.entry(ab.book_id).or_default().push(author.name);
+                        }
+                        map
+                    },
+                )
+        };
+
+        Ok(BookListResult {
+            items,
+            author_names,
+            total,
+        })
     }
 
-    async fn find_authors(&self, book_id: Uuid) -> Result<Vec<Author>, RepositoryError> {
-        let book = books::Entity::find_by_id(book_id)
-            .one(self.db)
-            .await?
-            .ok_or_else(|| RepositoryError::NotFound("Book not found".into()))?;
+    async fn find_authors(&self, book: &Book) -> Result<Vec<Author>, RepositoryError> {
         Ok(book.find_related(authors::Entity).all(self.db).await?)
     }
 
-    async fn find_series(&self, book_id: Uuid) -> Result<Vec<Series>, RepositoryError> {
-        let book = books::Entity::find_by_id(book_id)
-            .one(self.db)
-            .await?
-            .ok_or_else(|| RepositoryError::NotFound("Book not found".into()))?;
+    async fn find_series(&self, book: &Book) -> Result<Vec<Series>, RepositoryError> {
         Ok(book.find_related(series::Entity).all(self.db).await?)
     }
 
-    async fn find_identifiers(&self, book_id: Uuid) -> Result<Vec<Identifier>, RepositoryError> {
-        let book = books::Entity::find_by_id(book_id)
-            .one(self.db)
-            .await?
-            .ok_or_else(|| RepositoryError::NotFound("Book not found".into()))?;
+    async fn find_identifiers(&self, book: &Book) -> Result<Vec<Identifier>, RepositoryError> {
         Ok(book.find_related(identifiers::Entity).all(self.db).await?)
     }
 }

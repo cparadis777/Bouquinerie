@@ -2,7 +2,7 @@ use axum::Json;
 use axum::extract::{Path, Query, State};
 use db::state::AppState;
 use domain::entities::authors;
-use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
+use repository::authors::{AuthorListParams, AuthorRepository, DbAuthorRepository};
 use tracing::instrument;
 use uuid::Uuid;
 
@@ -24,13 +24,9 @@ pub async fn list_authors(
 ) -> Result<Json<AuthorListResponse>, AppError> {
     let page = normalize_page(params.page);
     let page_size = normalize_page_size(params.page_size);
-
-    let paginator = authors::Entity::find()
-        .order_by_asc(authors::Column::SortName)
-        .paginate(&state.db, page_size);
-    let items = paginator.fetch_page(page - 1).await?;
-    let total = paginator.num_items().await?;
-    let pages = paginator.num_pages().await?;
+    let repo = DbAuthorRepository::new(&state.db);
+    let (items, total) = repo.list(AuthorListParams { page, page_size }).await?;
+    let pages = total.div_ceil(page_size);
 
     Ok(Json(AuthorListResponse {
         data: items,
@@ -54,10 +50,10 @@ pub async fn get_author(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<authors::Model>, AppError> {
-    let author = authors::Entity::find_by_id(id)
-        .one(&state.db)
+    let repo = DbAuthorRepository::new(&state.db);
+    let author = repo
+        .find_by_id(id)
         .await?
         .ok_or_else(|| AppError::NotFound("Author not found".into()))?;
-
     Ok(Json(author))
 }

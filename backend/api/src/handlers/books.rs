@@ -1,18 +1,14 @@
-use std::collections::HashMap;
-
-use axum::Json;
-use axum::extract::{Path, Query, State};
-use db::state::AppState;
-use domain::entities::{authors, authors_books, books, identifiers, series, series_books};
-use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, PaginatorTrait, QueryFilter, QueryOrder};
-use tracing::instrument;
-use uuid::Uuid;
-
 use crate::error::AppError;
 use crate::response::{
     BookListEntry, BookListResponse, BookQueryParams, BookResponse, normalize_page,
     normalize_page_size,
 };
+use axum::Json;
+use axum::extract::{Path, Query, State};
+use db::state::AppState;
+use repository::books::{BookListParams, BookRepository, DbBookRepository};
+use tracing::instrument;
+use uuid::Uuid;
 
 #[instrument(skip(state))]
 #[utoipa::path(
@@ -29,59 +25,25 @@ pub async fn list_books(
 ) -> Result<Json<BookListResponse>, AppError> {
     let page = normalize_page(params.page);
     let page_size = normalize_page_size(params.page_size);
+    let repo = DbBookRepository::new(&state.db);
 
-    let mut query = books::Entity::find().order_by_asc(books::Column::SortTitle);
+    let mut result = repo
+        .list(BookListParams {
+            page,
+            page_size,
+            author_id: params.author_id,
+            series_id: params.series_id,
+        })
+        .await?;
 
-    if let Some(author_id) = params.author_id {
-        let book_ids: Vec<Uuid> = authors_books::Entity::find()
-            .filter(authors_books::Column::AuthorId.eq(author_id))
-            .all(&state.db)
-            .await?
-            .into_iter()
-            .map(|ab| ab.book_id)
-            .collect();
-        query = query.filter(books::Column::Id.is_in(book_ids));
-    }
-
-    if let Some(series_id) = params.series_id {
-        let book_ids: Vec<Uuid> = series_books::Entity::find()
-            .filter(series_books::Column::SeriesId.eq(series_id))
-            .all(&state.db)
-            .await?
-            .into_iter()
-            .map(|sb| sb.book_id)
-            .collect();
-        query = query.filter(books::Column::Id.is_in(book_ids));
-    }
-
-    let paginator = query.paginate(&state.db, page_size);
-    let items = paginator.fetch_page(page - 1).await?;
-    let total = paginator.num_items().await?;
-    let pages = paginator.num_pages().await?;
-
-    let book_ids: Vec<Uuid> = items.iter().map(|b| b.id).collect();
-
-    let author_map: HashMap<Uuid, Vec<String>> = if book_ids.is_empty() {
-        HashMap::new()
-    } else {
-        authors_books::Entity::find()
-            .filter(authors_books::Column::BookId.is_in(book_ids))
-            .find_also_related(authors::Entity)
-            .all(&state.db)
-            .await?
-            .into_iter()
-            .fold(HashMap::new(), |mut map, (ab, author_opt)| {
-                if let Some(author) = author_opt {
-                    map.entry(ab.book_id).or_default().push(author.name);
-                }
-                map
-            })
-    };
+    let total = result.total;
+    let items = result.items;
+    let pages = total.div_ceil(page_size);
 
     let data: Vec<BookListEntry> = items
         .into_iter()
         .map(|book| {
-            let author_names = author_map.get(&book.id).cloned().unwrap_or_default();
+            let author_names = result.author_names.remove(&book.id).unwrap_or_default();
             BookListEntry { book, author_names }
         })
         .collect();
@@ -108,17 +70,15 @@ pub async fn get_book(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<BookResponse>, AppError> {
-    let book = books::Entity::find_by_id(id)
-        .one(&state.db)
+    let repo = DbBookRepository::new(&state.db);
+    let book = repo
+        .find_by_id(id)
         .await?
         .ok_or_else(|| AppError::NotFound("Book not found".into()))?;
 
-    let authors = book.find_related(authors::Entity).all(&state.db).await?;
-    let series = book.find_related(series::Entity).all(&state.db).await?;
-    let identifiers = book
-        .find_related(identifiers::Entity)
-        .all(&state.db)
-        .await?;
+    let authors = repo.find_authors(&book).await?;
+    let series = repo.find_series(&book).await?;
+    let identifiers = repo.find_identifiers(&book).await?;
 
     Ok(Json(BookResponse {
         book,
