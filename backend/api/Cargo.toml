@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 axum = "0.8.9"
 db = { path = "../db" }
+domain = { path="../domain" }
 ingestion = { path = "../ingestion" }
 dotenvy = "0.15"
 sea-orm = { version = "2.0.0-rc.38", features = ["macros"] }

@@ -1,4 +1,3 @@
-pub mod entities;
 pub mod migrator;
 pub mod state;
 

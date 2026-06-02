@@ -1,6 +1,6 @@
 use axum::extract::{Path, Query, State};
 use axum::Json;
-use db::entities::series;
+use domain::entities::series;
 use db::state::AppState;
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
@@ -46,7 +46,7 @@ pub async fn list_series(
     get,
     path = "/api/series/{id}",
     responses(
-        (status = 200, description = "Series by ID", body = db::entities::series::Model),
+        (status = 200, description = "Series by ID", body = domain::entities::series::Model),
         (status = 404, description = "Series not found")
     )
 )]
