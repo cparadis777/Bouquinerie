@@ -31,9 +31,8 @@ impl Config {
             .and_then(|s| s.parse().ok())
             .unwrap_or(5);
 
-        let formats = std::env::var("SUPPORTED_FORMATS").unwrap_or_else(|_| {
-            "epub,pdf,mobi,azw3,m4b,mp3".to_string()
-        });
+        let formats = std::env::var("SUPPORTED_FORMATS")
+            .unwrap_or_else(|_| "epub,pdf,mobi,azw3,m4b,mp3".to_string());
         let supported_formats: Vec<String> = formats
             .split(',')
             .map(|s| s.trim().to_lowercase())
@@ -57,7 +56,10 @@ impl Config {
             }
         }
         if !self.library_path.exists() {
-            warn!("library path does not exist, will attempt to create: {}", self.library_path.display());
+            warn!(
+                "library path does not exist, will attempt to create: {}",
+                self.library_path.display()
+            );
         }
     }
 }

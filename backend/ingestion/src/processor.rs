@@ -59,9 +59,7 @@ pub async fn ingest(
     let filename = file_path
         .file_name()
         .and_then(|n| n.to_str())
-        .ok_or_else(|| {
-            library::LibraryError::PathValidation("invalid filename".into())
-        })?;
+        .ok_or_else(|| library::LibraryError::PathValidation("invalid filename".into()))?;
     let rel_path_str = rel_path.to_string_lossy().to_string();
 
     // 5. Begin database transaction — file stays in /incoming until commit succeeds
@@ -73,7 +71,8 @@ pub async fn ingest(
     // 7. Create book record
     let book_id = Uuid::new_v4();
     let now = chrono::Utc::now().naive_utc();
-    let published_date = meta.published_date
+    let published_date = meta
+        .published_date
         .unwrap_or_else(|| chrono::NaiveDate::from_ymd_opt(1970, 1, 1).unwrap());
 
     let book = books::ActiveModel {
@@ -125,15 +124,13 @@ pub async fn ingest(
     // --- All DB writes committed, safe to move the file ---
 
     // 11. Move file to library
-    let (dest_path, _) = library::move_to_library(
-        file_path,
-        &config.library_path,
-        &rel_path,
-        filename,
-    )
-    .await?;
+    let (dest_path, _) =
+        library::move_to_library(file_path, &config.library_path, &rel_path, filename).await?;
 
-    let book_dir = dest_path.parent().unwrap_or(&config.library_path).to_path_buf();
+    let book_dir = dest_path
+        .parent()
+        .unwrap_or(&config.library_path)
+        .to_path_buf();
 
     // 12. Save cover if available (non-fatal)
     if let Some(cover_data) = meta.cover_data {

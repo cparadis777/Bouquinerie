@@ -22,8 +22,8 @@ pub async fn start(db: DatabaseConnection, config: Config) {
 
     let watch_cfg = config.clone();
     let event_tx = tx.clone();
-    let mut watcher = match notify::recommended_watcher(move |res: Result<Event, notify::Error>| {
-        match res {
+    let mut watcher =
+        match notify::recommended_watcher(move |res: Result<Event, notify::Error>| match res {
             Ok(event) => {
                 if matches!(event.kind, EventKind::Create(_) | EventKind::Modify(_)) {
                     for path in event.paths {
@@ -34,14 +34,13 @@ pub async fn start(db: DatabaseConnection, config: Config) {
                 }
             }
             Err(e) => warn!("notify error: {e}"),
-        }
-    }) {
-        Ok(w) => w,
-        Err(e) => {
-            error!("failed to create file watcher: {e}");
-            return;
-        }
-    };
+        }) {
+            Ok(w) => w,
+            Err(e) => {
+                error!("failed to create file watcher: {e}");
+                return;
+            }
+        };
 
     for dir in &config.watched_dirs {
         match watcher.watch(dir, RecursiveMode::NonRecursive) {

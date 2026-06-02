@@ -1,5 +1,5 @@
-use axum::extract::State;
 use axum::Json;
+use axum::extract::State;
 use db::state::AppState;
 use tracing::instrument;
 
@@ -18,5 +18,7 @@ pub async fn health_check(
     State(state): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     state.db.ping().await?;
-    Ok(Json(serde_json::json!({ "status": "ok", "database": "connected" })))
+    Ok(Json(
+        serde_json::json!({ "status": "ok", "database": "connected" }),
+    ))
 }

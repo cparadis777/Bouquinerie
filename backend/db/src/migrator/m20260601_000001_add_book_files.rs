@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, schema::*, DbErr, MigrationTrait, SchemaManager};
+use sea_orm_migration::{DbErr, MigrationTrait, SchemaManager, prelude::*, schema::*};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
