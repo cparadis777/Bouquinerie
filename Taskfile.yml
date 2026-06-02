@@ -3,6 +3,7 @@ version: '3'
 vars:
   RUST_DIR: backend
   DB_DIR: backend/db
+  DOMAIN_DIR: backend/domain
   FRONTEND_DIST: ../web/dist
 
 tasks:
@@ -21,7 +22,7 @@ tasks:
 
   db:entities:
     desc: Generate SeaORM entity files from the database schema
-    dir: "{{.DB_DIR}}"
+    dir: "{{.DOMAIN_DIR}}"
     cmds:
       - sea-orm-cli generate entity -u "$DATABASE_URL" -o src/entities --with-serde both --model-extra-derives 'utoipa::ToSchema'
     requires:
