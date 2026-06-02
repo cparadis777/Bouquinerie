@@ -125,6 +125,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "db",
+ "domain",
  "dotenvy",
  "ingestion",
  "sea-orm",
@@ -868,6 +869,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "sea-orm",
+ "serde",
+ "utoipa",
+]
+
+[[package]]
 name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1479,6 +1489,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "db",
+ "domain",
  "epub",
  "hex",
  "itertools",

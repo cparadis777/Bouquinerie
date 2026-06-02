@@ -112,7 +112,7 @@ pub fn build_rel_path(meta: &BookMeta) -> PathBuf {
         .unwrap_or_default();
 
     let book_dir = if year.is_empty() {
-        format!("{}", title)
+        title.to_string()
     } else {
         format!("{} ({})", title, year)
     };

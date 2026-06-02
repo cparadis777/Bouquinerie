@@ -1,6 +1,6 @@
 use axum::extract::{Path, Query, State};
 use axum::Json;
-use db::entities::authors;
+use domain::entities::authors;
 use db::state::AppState;
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
@@ -48,7 +48,7 @@ pub async fn list_authors(
     get,
     path = "/api/authors/{id}",
     responses(
-        (status = 200, description = "Author by ID", body = db::entities::authors::Model),
+        (status = 200, description = "Author by ID", body = domain::entities::authors::Model),
         (status = 404, description = "Author not found")
     )
 )]

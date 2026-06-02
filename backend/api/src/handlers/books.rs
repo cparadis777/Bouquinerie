@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use axum::extract::{Path, Query, State};
 use axum::Json;
-use db::entities::{authors, authors_books, books, identifiers, series, series_books};
+use domain::entities::{authors, authors_books, books, identifiers, series, series_books};
 use db::state::AppState;
 use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, PaginatorTrait, QueryFilter, QueryOrder};
 use tracing::instrument;

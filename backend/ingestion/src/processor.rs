@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use db::entities::{authors, authors_books, book_files, books};
+use domain::entities::{authors, authors_books, book_files, books};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
     Set, TransactionTrait,
@@ -80,7 +80,7 @@ pub async fn ingest(
         id: Set(book_id),
         title: Set(meta.title),
         subtitle: Set(meta.subtitle.unwrap_or_default()),
-        description: Set(meta.description.unwrap_or_default().into()),
+        description: Set(meta.description.unwrap_or_default()),
         language: Set(meta.language),
         publisher: Set(meta.publisher.unwrap_or_default()),
         isbn: Set(meta.isbn.unwrap_or_default()),

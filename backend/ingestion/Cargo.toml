@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
 db = { path = "../db" }
+domain = { path = "../domain"}
 epub = "2.1"
 hex = "0.4"
 itertools = "0.14.0"

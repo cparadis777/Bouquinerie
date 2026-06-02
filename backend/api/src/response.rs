@@ -1,4 +1,4 @@
-use db::entities::books;
+use domain::entities::books;
 use serde::{Deserialize, Deserializer, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -58,7 +58,7 @@ pub struct BookListResponse {
 
 #[derive(Serialize, ToSchema)]
 pub struct AuthorListResponse {
-    pub data: Vec<db::entities::authors::Model>,
+    pub data: Vec<domain::entities::authors::Model>,
     pub total: u64,
     pub page: u64,
     pub pages: u64,
@@ -67,7 +67,7 @@ pub struct AuthorListResponse {
 
 #[derive(Serialize, ToSchema)]
 pub struct SeriesListResponse {
-    pub data: Vec<db::entities::series::Model>,
+    pub data: Vec<domain::entities::series::Model>,
     pub total: u64,
     pub page: u64,
     pub pages: u64,
@@ -76,10 +76,10 @@ pub struct SeriesListResponse {
 
 #[derive(Serialize, ToSchema)]
 pub struct BookResponse {
-    pub book: db::entities::books::Model,
-    pub authors: Vec<db::entities::authors::Model>,
-    pub series: Vec<db::entities::series::Model>,
-    pub identifiers: Vec<db::entities::identifiers::Model>,
+    pub book: domain::entities::books::Model,
+    pub authors: Vec<domain::entities::authors::Model>,
+    pub series: Vec<domain::entities::series::Model>,
+    pub identifiers: Vec<domain::entities::identifiers::Model>,
 }
 
 pub fn normalize_page(page: Option<u64>) -> u64 {
@@ -87,5 +87,5 @@ pub fn normalize_page(page: Option<u64>) -> u64 {
 }
 
 pub fn normalize_page_size(size: Option<u64>) -> u64 {
-    size.unwrap_or(20).max(1).min(100)
+    size.unwrap_or(20).clamp(1, 100)
 }
