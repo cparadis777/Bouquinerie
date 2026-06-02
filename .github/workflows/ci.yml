@@ -23,6 +23,7 @@ jobs:
       - name: Install Rust toolchain
         run: |
           rustup show
+          rustup component add rustfmt clippy
           rustup target add x86_64-unknown-linux-musl
 
       - name: Cache Cargo
