@@ -2,7 +2,7 @@
 # ============================================================
 # Stage 1 — Build the Vue/Vite frontend
 # ============================================================
-FROM oven/bun:1.3-alpine AS frontend-builder
+FROM docker.io/oven/bun:1.3-alpine AS frontend-builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN bun run build
 # ============================================================
 # Stage 2 — Build the Rust API binary (fully static MUSL)
 # ============================================================
-FROM rust:1.96-alpine3.21 AS rust-builder
+FROM docker.io/rust:1.96-alpine3.21 AS rust-builder
 
 WORKDIR /app
 
@@ -29,12 +29,14 @@ COPY backend/api/Cargo.toml backend/api/
 COPY backend/db/Cargo.toml backend/db/
 COPY backend/domain/Cargo.toml backend/domain/
 COPY backend/ingestion/Cargo.toml backend/ingestion/
+COPY backend/repository/Cargo.toml backend/repository/
 
-RUN mkdir -p backend/api/src backend/db/src backend/domain/src backend/ingestion/src && \
+RUN mkdir -p backend/api/src backend/db/src backend/domain/src backend/ingestion/src backend/repository/src && \
     echo "fn main() {}" > backend/api/src/main.rs && \
     touch backend/db/src/lib.rs && \
     touch backend/domain/src/lib.rs && \
-    touch backend/ingestion/src/lib.rs
+    touch backend/ingestion/src/lib.rs && \
+    touch backend/repository/src/lib.rs
 
 RUN cargo build --release --target x86_64-unknown-linux-musl --bin api
 
@@ -47,7 +49,7 @@ RUN cargo build --release --target x86_64-unknown-linux-musl --bin api && \
 # ============================================================
 # Stage 3 — Runtime directories and system files
 # ============================================================
-FROM alpine:3.21 AS prep
+FROM docker.io/alpine:3.21 AS prep
 
 RUN mkdir -p /incoming /library /tmp && \
     adduser -D -u 1000 -h /tmp bouquinerie

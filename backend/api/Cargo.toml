@@ -19,7 +19,7 @@ tower-http = { version = "0.5", features = ["cors", "fs", "trace", "request-id"]
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "tracing-log"] }
 utoipa = { version = "5.5.0", features = ["axum_extras", "uuid"] }
-utoipa-swagger-ui = { version = "9", features = ["axum"] }
+utoipa-swagger-ui = { version = "9", features = ["axum", "reqwest"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 
 [features]
