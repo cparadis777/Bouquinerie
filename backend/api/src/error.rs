@@ -1,8 +1,9 @@
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Json;
 
 #[derive(Debug, thiserror::Error)]
+#[expect(dead_code)]
 pub enum AppError {
     #[error("Not found: {0}")]
     NotFound(String),
@@ -31,10 +32,7 @@ impl IntoResponse for AppError {
             }
             AppError::Internal(msg) => {
                 tracing::error!(?self, "internal error");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    msg.clone(),
-                )
+                (StatusCode::INTERNAL_SERVER_ERROR, msg.clone())
             }
         };
 

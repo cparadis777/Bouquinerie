@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 
-use axum::extract::{Path, Query, State};
 use axum::Json;
-use domain::entities::{authors, authors_books, books, identifiers, series, series_books};
+use axum::extract::{Path, Query, State};
 use db::state::AppState;
+use domain::entities::{authors, authors_books, books, identifiers, series, series_books};
 use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, PaginatorTrait, QueryFilter, QueryOrder};
 use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::response::{
-    normalize_page, normalize_page_size, BookListEntry, BookListResponse, BookQueryParams,
-    BookResponse,
+    BookListEntry, BookListResponse, BookQueryParams, BookResponse, normalize_page,
+    normalize_page_size,
 };
 
 #[instrument(skip(state))]
@@ -115,7 +115,10 @@ pub async fn get_book(
 
     let authors = book.find_related(authors::Entity).all(&state.db).await?;
     let series = book.find_related(series::Entity).all(&state.db).await?;
-    let identifiers = book.find_related(identifiers::Entity).all(&state.db).await?;
+    let identifiers = book
+        .find_related(identifiers::Entity)
+        .all(&state.db)
+        .await?;
 
     Ok(Json(BookResponse {
         book,

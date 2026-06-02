@@ -1,4 +1,4 @@
-use sea_orm_migration::{MigratorTrait, MigrationTrait};
+use sea_orm_migration::{MigrationTrait, MigratorTrait};
 
 mod m20260530_000001_create_core_tables;
 mod m20260531_000001_add_fk_indexes;

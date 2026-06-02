@@ -1,13 +1,13 @@
-use axum::extract::{Path, Query, State};
 use axum::Json;
-use domain::entities::series;
+use axum::extract::{Path, Query, State};
 use db::state::AppState;
+use domain::entities::series;
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 use tracing::instrument;
 use uuid::Uuid;
 
 use crate::error::AppError;
-use crate::response::{normalize_page, normalize_page_size, PaginationParams, SeriesListResponse};
+use crate::response::{PaginationParams, SeriesListResponse, normalize_page, normalize_page_size};
 
 #[instrument(skip(state))]
 #[utoipa::path(

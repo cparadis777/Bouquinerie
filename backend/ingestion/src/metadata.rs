@@ -72,7 +72,7 @@ mod epub {
 
     use chrono::NaiveDate;
 
-    use super::{detect_medium, BookMeta, ExtractError};
+    use super::{BookMeta, ExtractError, detect_medium};
 
     pub fn extract(path: &Path) -> Result<BookMeta, ExtractError> {
         let mut doc =

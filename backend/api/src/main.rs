@@ -2,7 +2,7 @@ use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 use db::{init_database, run_migrations, state::AppState};
 use tokio::net::TcpListener;
 use tower_http::classify::ServerErrorsFailureClass;
@@ -10,14 +10,14 @@ use tower_http::cors::CorsLayer;
 use tower_http::request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetRequestIdLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
-use tracing::{info, info_span, Span};
-use uuid::Uuid;
+use tracing::{Span, info, info_span};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use uuid::Uuid;
 
 mod error;
-mod health;
 mod handlers;
+mod health;
 mod logging;
 mod response;
 
@@ -136,13 +136,8 @@ async fn main() {
                     },
                 )
                 .on_failure(
-                    |_err: ServerErrorsFailureClass,
-                     latency: Duration,
-                     _span: &Span| {
-                        tracing::error!(
-                            latency_ms = latency.as_millis() as u64,
-                            "request failed"
-                        );
+                    |_err: ServerErrorsFailureClass, latency: Duration, _span: &Span| {
+                        tracing::error!(latency_ms = latency.as_millis() as u64, "request failed");
                     },
                 ),
         )

@@ -1,5 +1,5 @@
-use std::path::{Component, Path, PathBuf};
 use itertools::Itertools;
+use std::path::{Component, Path, PathBuf};
 
 use sha2::{Digest, Sha256};
 use tokio::fs;
@@ -8,8 +8,7 @@ use tokio::io::AsyncReadExt;
 use crate::metadata::BookMeta;
 
 const SUFFIXES: [&str; 12] = [
-    "Jr.", "Sr.", "II", "III", "IV", "V",
-    "M.D.", "Ph.D.", "Esq.", "CPA", "DDS", "MD",
+    "Jr.", "Sr.", "II", "III", "IV", "V", "M.D.", "Ph.D.", "Esq.", "CPA", "DDS", "MD",
 ];
 
 #[derive(Debug, thiserror::Error)]
@@ -72,7 +71,7 @@ pub fn sanitize_filename(name: &str) -> String {
         })
         .collect();
 
-    sanitized = sanitized.split_whitespace().join(" "); 
+    sanitized = sanitized.split_whitespace().join(" ");
     sanitized.truncate(200);
     sanitized.trim().to_string()
 }
@@ -83,12 +82,12 @@ fn validate_rel_path(path: &Path) -> Result<(), LibraryError> {
             Component::ParentDir => {
                 return Err(LibraryError::PathValidation(
                     "parent dir traversal not allowed".into(),
-                ))
+                ));
             }
             Component::RootDir => {
                 return Err(LibraryError::PathValidation(
                     "absolute path components not allowed".into(),
-                ))
+                ));
             }
             _ => {}
         }
@@ -121,10 +120,9 @@ pub fn build_rel_path(meta: &BookMeta) -> PathBuf {
 }
 
 pub async fn hash_file(path: &Path) -> Result<String, LibraryError> {
-    let file =
-        tokio::fs::File::open(path)
-            .await
-            .map_err(LibraryError::ReadFailed)?;
+    let file = tokio::fs::File::open(path)
+        .await
+        .map_err(LibraryError::ReadFailed)?;
     let mut reader = tokio::io::BufReader::new(file);
     let mut hasher = Sha256::new();
     let mut buf = vec![0u8; 65536];
@@ -184,9 +182,7 @@ pub async fn save_cover(book_dir: &Path, data: &[u8]) -> Result<PathBuf, Library
 }
 
 pub async fn file_size(path: &Path) -> Result<i64, LibraryError> {
-    let metadata = fs::metadata(path)
-        .await
-        .map_err(LibraryError::ReadFailed)?;
+    let metadata = fs::metadata(path).await.map_err(LibraryError::ReadFailed)?;
     Ok(metadata.len() as i64)
 }
 

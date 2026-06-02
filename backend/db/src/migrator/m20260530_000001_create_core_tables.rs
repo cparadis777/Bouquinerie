@@ -1,5 +1,5 @@
 use sea_orm_migration::schema::*;
-use sea_orm_migration::{prelude::*, DbErr, MigrationTrait, SchemaManager};
+use sea_orm_migration::{DbErr, MigrationTrait, SchemaManager, prelude::*};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
