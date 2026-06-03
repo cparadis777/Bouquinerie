@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import { Icon } from "@iconify/vue";
 
 const route = useRoute()
 
 const tabs = [
-  { name: 'dashboard', label: 'Dashboard', path: '/', icon: '⊞' },
-  { name: 'books', label: 'Books', path: '/books', icon: '⊡' },
-  { name: 'authors', label: 'Authors', path: '/authors', icon: '⊛' },
-  { name: 'series', label: 'Series', path: '/series', icon: '⊟' },
+  { name: 'dashboard', label: 'Dashboard', path: '/', icon: 'material-symbols:home' },
+  { name: 'books', label: 'Books', path: '/books', icon: 'material-symbols-light:book' },
+  { name: 'authors', label: 'Authors', path: '/authors', icon: 'material-symbols:person-rounded' },
+  { name: 'series', label: 'Series', path: '/series', icon: 'mdi:books' },
 ]
 </script>
 
@@ -22,7 +23,7 @@ const tabs = [
         class="tab"
         :class="{ active: route.name === tab.name }"
       >
-        <span class="icon">{{ tab.icon }}</span>
+        <Icon :icon="tab.icon" />
         <span class="label">{{ tab.label }}</span>
       </router-link>
     </div>
