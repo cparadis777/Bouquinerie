@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import BookCover from './BookCover.vue'
-import type { components } from '../types/api'
+import type { components } from '../../types/api'
 
 const router = useRouter()
 

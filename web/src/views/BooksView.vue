@@ -2,11 +2,11 @@
 import { ref, watch, onMounted } from 'vue'
 import { useBookStore } from '../stores/books'
 import { useResponsivePageSize } from '../composables/useResponsivePageSize'
-import PageHeader from '../components/PageHeader.vue'
-import BookCard from '../components/BookCard.vue'
-import PaginationBar from '../components/PaginationBar.vue'
-import LoadingState from '../components/LoadingState.vue'
-import EmptyState from '../components/EmptyState.vue'
+import PageHeader from '../components/primitive/PageHeader.vue'
+import BookCard from '../components/book/BookCard.vue'
+import PaginationBar from '../components/primitive/PaginationBar.vue'
+import LoadingState from '../components/primitive/LoadingState.vue'
+import EmptyState from '../components/primitive/EmptyState.vue'
 
 const viewRef = ref<HTMLElement | null>(null)
 const store = useBookStore()

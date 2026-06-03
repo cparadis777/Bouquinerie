@@ -3,9 +3,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { CollapsibleRoot as Collapsible, CollapsibleTrigger, CollapsibleContent } from 'reka-ui'
 import { useBookStore } from '../stores/books'
-import BackButton from '../components/BackButton.vue'
-import BookCover from '../components/BookCover.vue'
-import LoadingState from '../components/LoadingState.vue'
+import BackButton from '../components/primitive/BackButton.vue'
+import BookCover from '../components/book/BookCover.vue'
+import LoadingState from '../components/primitive/LoadingState.vue'
 
 const route = useRoute()
 const store = useBookStore()

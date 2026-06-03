@@ -2,10 +2,10 @@
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthorStore } from '../stores/authors'
-import BackButton from '../components/BackButton.vue'
-import BookCard from '../components/BookCard.vue'
-import LoadingState from '../components/LoadingState.vue'
-import EmptyState from '../components/EmptyState.vue'
+import BackButton from '../components/primitive/BackButton.vue'
+import BookCard from '../components/book/BookCard.vue'
+import LoadingState from '../components/primitive/LoadingState.vue'
+import EmptyState from '../components/primitive/EmptyState.vue'
 
 const route = useRoute()
 const store = useAuthorStore()

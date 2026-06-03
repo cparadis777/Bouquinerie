@@ -3,10 +3,10 @@ import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSeriesStore } from '../stores/series'
 import { useResponsivePageSize } from '../composables/useResponsivePageSize'
-import PageHeader from '../components/PageHeader.vue'
-import PaginationBar from '../components/PaginationBar.vue'
-import LoadingState from '../components/LoadingState.vue'
-import EmptyState from '../components/EmptyState.vue'
+import PageHeader from '../components/primitive/PageHeader.vue'
+import PaginationBar from '../components/primitive/PaginationBar.vue'
+import LoadingState from '../components/primitive/LoadingState.vue'
+import EmptyState from '../components/primitive/EmptyState.vue'
 
 const router = useRouter()
 const viewRef = ref<HTMLElement | null>(null)

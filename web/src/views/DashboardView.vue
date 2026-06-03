@@ -3,9 +3,9 @@ import { ref, onMounted } from 'vue'
 import { getBooks } from '../services/books'
 import { getAuthors } from '../services/authors'
 import { getSeries } from '../services/series'
-import BookCard from '../components/BookCard.vue'
-import LoadingState from '../components/LoadingState.vue'
-import ErrorState from '../components/ErrorState.vue'
+import BookCard from '../components/book/BookCard.vue'
+import LoadingState from '../components/primitive/LoadingState.vue'
+import ErrorState from '../components/primitive/ErrorState.vue'
 
 const bookCount = ref(0)
 const authorCount = ref(0)
