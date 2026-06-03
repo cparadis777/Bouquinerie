@@ -25,7 +25,7 @@ pub struct BookMeta {
     pub title: String,
     pub subtitle: Option<String>,
     pub authors: Vec<String>,
-    pub isbn: Option<String>,
+    pub identifiers: Vec<(String, String)>,
     pub publisher: Option<String>,
     pub language: String,
     pub published_date: Option<NaiveDate>,
@@ -97,14 +97,20 @@ mod epub {
             authors.push("Unknown Author".to_string());
         }
 
-        let isbn = doc.mdata("identifier").map(|m| {
-            let v = m.value.trim().to_string();
-            if v.starts_with("urn:isbn:") {
-                v.trim_start_matches("urn:isbn:").to_string()
-            } else {
-                v
+        let mut identifiers: Vec<(String, String)> = Vec::new();
+
+        for item in &doc.metadata {
+            if item.property == "identifier" {
+                let v = item.value.trim().to_string();
+                if !v.is_empty() {
+                    if let Some(isbn) = v.strip_prefix("urn:isbn") {
+                        identifiers.push(("isbn".to_string(), isbn.to_string()));
+                    } else {
+                        identifiers.push(("other".to_string(), v));
+                    }
+                }
             }
-        });
+        }
 
         let publisher = doc.mdata("publisher").map(|m| m.value.clone());
 
@@ -136,7 +142,7 @@ mod epub {
             title,
             subtitle: None,
             authors,
-            isbn,
+            identifiers,
             publisher,
             language,
             published_date,

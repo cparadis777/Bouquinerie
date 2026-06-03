@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use domain::entities::{authors, authors_books, book_files, books};
+use domain::entities::{authors, authors_books, book_files, books, identifiers};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
     Set, TransactionTrait,
@@ -82,7 +82,6 @@ pub async fn ingest(
         description: Set(meta.description.unwrap_or_default()),
         language: Set(meta.language),
         publisher: Set(meta.publisher.unwrap_or_default()),
-        isbn: Set(meta.isbn.unwrap_or_default()),
         page_count: Set(meta.page_count.unwrap_or(0)),
         cover_path: Set(String::new()),
         published_date: Set(published_date),
@@ -94,6 +93,16 @@ pub async fn ingest(
         size_bytes: Set(size),
     };
     book.insert(&txn).await?;
+
+    for (source, value) in &meta.identifiers {
+        let ident = identifiers::ActiveModel {
+            id: Set(Uuid::new_v4()),
+            book_id: Set(book_id),
+            source: Set(source.clone()),
+            value: Set(value.clone()),
+        };
+        ident.insert(&txn).await?;
+    }
 
     // 8. Create authors_books join records
     for (i, author_id) in author_ids.iter().enumerate() {

@@ -8,10 +8,10 @@
   "features": {},
 
   "postCreateCommand": "cargo install sea-orm-cli && cargo install cargo-watch && prek install",
-  "forwardPorts": [3000, 5432, 8080],
+  "forwardPorts": [3000, "postgres:5432"],
   "portsAttributes": {
     "3000": { "label": "Rust API", "protocol": "http" },
-    "5432": { "label": "PostgreSQL" }
+    "5432": {"label": "Postgres"}
   },
   "customizations": {
     "vscode": {

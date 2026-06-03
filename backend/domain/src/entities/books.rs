@@ -16,7 +16,6 @@ pub struct Model {
     pub description: String,
     pub language: String,
     pub publisher: String,
-    pub isbn: String,
     pub page_count: i32,
     pub cover_path: String,
     pub published_date: Date,
