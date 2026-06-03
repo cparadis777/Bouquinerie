@@ -1,17 +1,46 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { CollapsibleRoot as Collapsible, CollapsibleTrigger, CollapsibleContent } from 'reka-ui'
 import { useBookStore } from '../stores/books'
 import BackButton from '../components/primitive/BackButton.vue'
 import BookCover from '../components/book/BookCover.vue'
 import LoadingState from '../components/primitive/LoadingState.vue'
+import { formatDate, formatIsbn, formatLanguage } from '../utils/format'
 
 const route = useRoute()
 const store = useBookStore()
 const descExpanded = ref(false)
+const lightboxOpen = ref(false)
+const lightboxRef = ref<HTMLElement | null>(null)
+
+const identifiers = computed(() => {
+  const labels: Record<string, string> = {
+    isbn_13: 'ISBN-13',
+    isbn_10: 'ISBN-10',
+    asin: 'ASIN',
+    google_books_id: 'Google Books',
+    open_library_id: 'Open Library',
+    goodreads_id: 'Goodreads',
+    viaf: 'VIAF',
+  }
+  const known: { label: string; value: string }[] = []
+  const other: { source: string; value: string }[] = []
+  const seenSources = new Set<string>()
+  for (const id of store.currentBook?.identifiers ?? []) {
+    seenSources.add(id.source)
+    const label = labels[id.source]
+    if (label) known.push({ label, value: id.source === 'isbn_13' ? formatIsbn(id.value) : id.value })
+    else other.push({ source: id.source, value: id.value })
+  }
+  return { known, other }
+})
 
 onMounted(() => store.fetchBook(route.params.id as string))
+
+watch(lightboxOpen, (open) => {
+  if (open) nextTick(() => lightboxRef.value?.focus())
+})
 </script>
 
 <template>
@@ -22,8 +51,20 @@ onMounted(() => store.fetchBook(route.params.id as string))
 
     <template v-else-if="store.currentBook">
       <div class="hero">
+        <div
+          v-if="store.currentBook.book.cover_path"
+          class="cover-wrapper"
+          @click="lightboxOpen = true"
+        >
+          <BookCover
+            :cover-path="store.currentBook.book.cover_path"
+            :title="store.currentBook.book.title"
+            size="md"
+          />
+        </div>
         <BookCover
-          :cover-path="store.currentBook.book.cover_path"
+          v-else
+          :cover-path="null"
           :title="store.currentBook.book.title"
           size="md"
         />
@@ -36,6 +77,24 @@ onMounted(() => store.fetchBook(route.params.id as string))
           </div>
         </div>
       </div>
+
+      <Teleport to="body">
+        <div
+          v-if="lightboxOpen"
+          ref="lightboxRef"
+          class="lightbox-overlay"
+          tabindex="-1"
+          @click.self="lightboxOpen = false"
+          @keydown.escape="lightboxOpen = false"
+        >
+          <img
+            :src="`/covers/${store.currentBook.book.cover_path}`"
+            alt=""
+            class="lightbox-image"
+          />
+          <button class="lightbox-close" @click="lightboxOpen = false">×</button>
+        </div>
+      </Teleport>
 
       <section class="section">
         <Collapsible v-model:open="descExpanded" :unmount-on-hide="false">
@@ -58,13 +117,9 @@ onMounted(() => store.fetchBook(route.params.id as string))
             <td>Publisher</td>
             <td>{{ store.currentBook.book.publisher }}</td>
           </tr>
-          <tr v-if="store.currentBook.book.isbn">
-            <td>ISBN</td>
-            <td>{{ store.currentBook.book.isbn }}</td>
-          </tr>
           <tr v-if="store.currentBook.book.published_date">
             <td>Published</td>
-            <td>{{ store.currentBook.book.published_date }}</td>
+            <td>{{ formatDate(store.currentBook.book.published_date) }}</td>
           </tr>
           <tr v-if="store.currentBook.book.page_count">
             <td>Pages</td>
@@ -72,9 +127,21 @@ onMounted(() => store.fetchBook(route.params.id as string))
           </tr>
           <tr>
             <td>Language</td>
-            <td>{{ store.currentBook.book.language }}</td>
+            <td>{{ formatLanguage(store.currentBook.book.language) }}</td>
           </tr>
         </table>
+      </section>
+
+      <section class="section" v-if="identifiers.known.length || identifiers.other.length">
+        <h2>Identifiers</h2>
+        <div class="id-field" v-for="field in identifiers.known" :key="field.label">
+          <span class="id-label">{{ field.label }}</span>
+          <span class="id-value">{{ field.value }}</span>
+        </div>
+        <div class="id-field" v-for="id in identifiers.other" :key="id.source">
+          <span class="id-label">{{ id.source }}</span>
+          <span class="id-value">{{ id.value }}</span>
+        </div>
       </section>
 
       <section class="section" v-if="store.currentBook.authors.length">
@@ -128,6 +195,11 @@ onMounted(() => store.fetchBook(route.params.id as string))
   display: flex;
   gap: 28px;
   align-items: flex-start;
+}
+
+.cover-wrapper {
+  cursor: zoom-in;
+  flex-shrink: 0;
 }
 
 .hero-text {
@@ -191,6 +263,21 @@ onMounted(() => store.fetchBook(route.params.id as string))
   width: 120px;
 }
 
+.id-field {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.id-label {
+  color: var(--text-muted);
+  min-width: 100px;
+}
+
+.id-value {
+  color: var(--text);
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -210,5 +297,46 @@ onMounted(() => store.fetchBook(route.params.id as string))
 
 .chip:hover {
   background: var(--surface-hover);
+}
+</style>
+
+<style>
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  font-size: 32px;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 </style>
