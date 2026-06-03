@@ -6,9 +6,11 @@ import { getBooks } from '../services/books'
 import type { components } from '../types/api'
 
 export const useAuthorStore = defineStore('authors', () => {
+  const pageSize = ref(30)
+
   const list = usePaginatedList(
-    (page, pageSize) => getAuthors({ page, page_size: pageSize }),
-    30,
+    (page, ps) => getAuthors({ page, page_size: ps }),
+    pageSize,
   )
 
   const currentAuthor = ref<components['schemas']['Author'] | null>(null)

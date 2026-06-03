@@ -1,19 +1,29 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthorStore } from '../stores/authors'
+import { useResponsivePageSize } from '../composables/useResponsivePageSize'
 import PageHeader from '../components/PageHeader.vue'
 import PaginationBar from '../components/PaginationBar.vue'
 import LoadingState from '../components/LoadingState.vue'
 import EmptyState from '../components/EmptyState.vue'
 
 const router = useRouter()
+const viewRef = ref<HTMLElement | null>(null)
 const store = useAuthorStore()
+const { pageSize } = useResponsivePageSize({
+  containerRef: viewRef,
+  minPageSize: 30,
+})
+
+watch(pageSize, (val) => { store.pageSize = val }, { immediate: true })
+watch(pageSize, () => store.load())
+
 onMounted(() => store.load())
 </script>
 
 <template>
-  <div class="authors-view">
+  <div class="authors-view" ref="viewRef">
     <PageHeader title="Authors" :count="store.total" />
     <LoadingState v-if="store.loading" />
     <template v-else-if="store.data.length">
@@ -33,7 +43,7 @@ onMounted(() => store.load())
       <PaginationBar
         v-model:page="store.page"
         :total="store.total"
-        :page-size="30"
+        :page-size="store.pageSize"
       />
     </template>
     <EmptyState v-else message="No authors found." />
@@ -42,6 +52,9 @@ onMounted(() => store.load())
 
 <style scoped>
 .authors-view {
+  --min-card-width: 200px;
+  --card-gap: 12px;
+
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -49,8 +62,8 @@ onMounted(() => store.load())
 
 .list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr));
+  gap: var(--card-gap);
 }
 
 .author-card {

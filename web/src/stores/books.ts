@@ -5,9 +5,11 @@ import { getBooks, getBook } from '../services/books'
 import type { components } from '../types/api'
 
 export const useBookStore = defineStore('books', () => {
+  const pageSize = ref(20)
+
   const list = usePaginatedList(
-    (page, pageSize) => getBooks({ page, page_size: pageSize }),
-    20,
+    (page, ps) => getBooks({ page, page_size: ps }),
+    pageSize,
   )
 
   const currentBook = ref<components['schemas']['BookResponse'] | null>(null)

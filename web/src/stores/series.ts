@@ -6,9 +6,11 @@ import { getBooks } from '../services/books'
 import type { components } from '../types/api'
 
 export const useSeriesStore = defineStore('series', () => {
+  const pageSize = ref(30)
+
   const list = usePaginatedList(
-    (page, pageSize) => getSeries({ page, page_size: pageSize }),
-    30,
+    (page, ps) => getSeries({ page, page_size: ps }),
+    pageSize,
   )
 
   const currentSeries = ref<components['schemas']['Series'] | null>(null)
