@@ -16,17 +16,55 @@ tasks:
   # Database Tasks (SeaORM)
   # -----------------------------------------
   db:cli:
-    desc: Install sea-orm-cli for code generation and migrations
+    desc: Install sea-orm-cli for code generation
     cmds:
       - cargo install sea-orm-cli
+
+  db:migrate:
+    desc: Apply pending migrations
+    dir: "{{.DB_DIR}}"
+    cmds:
+      - cargo run --bin migrate up
+    requires:
+      vars: ["DATABASE_URL"]
+
+  db:rollback:
+    desc: Rollback the last migration
+    dir: "{{.DB_DIR}}"
+    cmds:
+      - cargo run --bin migrate down
+    requires:
+      vars: ["DATABASE_URL"]
+
+  db:reset:
+    desc: Rollback all migrations then re-apply
+    dir: "{{.DB_DIR}}"
+    cmds:
+      - cargo run --bin migrate reset
+    requires:
+      vars: ["DATABASE_URL"]
+
+  db:fresh:
+    desc: Drop all tables then re-apply all migrations
+    dir: "{{.DB_DIR}}"
+    cmds:
+      - cargo run --bin migrate fresh
+    requires:
+      vars: ["DATABASE_URL"]
 
   db:entities:
     desc: Generate SeaORM entity files from the database schema
     dir: "{{.DOMAIN_DIR}}"
     cmds:
-      - sea-orm-cli generate entity -u "$DATABASE_URL" -o src/entities --with-serde both --model-extra-derives 'utoipa::ToSchema'
+      - sea-orm-cli generate entity -u "$DATABASE_URL" -o src/entities --ignore-tables sessions,seaql_migrations --with-serde both --model-extra-derives 'utoipa::ToSchema'
     requires:
       vars: ["DATABASE_URL"]
+
+  db:sync-entities:
+    desc: Apply migrations then regenerate entities (single step, no drift window)
+    cmds:
+      - task: db:migrate
+      - task: db:entities
 
 
   # -----------------------------------------

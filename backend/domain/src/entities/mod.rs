@@ -9,3 +9,4 @@ pub mod books;
 pub mod identifiers;
 pub mod series;
 pub mod series_books;
+pub mod users;

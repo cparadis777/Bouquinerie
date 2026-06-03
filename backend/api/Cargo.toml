@@ -4,23 +4,29 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+async-trait = "0.1"
 axum = "0.8.9"
+chrono = { version = "0.4", features = ["serde"] }
 db = { path = "../db" }
 domain = { path="../domain" }
 ingestion = { path = "../ingestion" }
 repository = { path = "../repository" }
 dotenvy = "0.15"
 sea-orm = { version = "2.0.0-rc.38", features = ["macros"] }
-thiserror = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0.150"
+time = "0.3"
 tokio = { version = "1.52.3", features = ["macros", "rt-multi-thread", "signal"] }
 tower-http = { version = "0.5", features = ["cors", "fs", "trace", "request-id"] }
+tower-sessions = "0.14"
+axum-login = "0.18"
+password-auth = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "tracing-log"] }
 utoipa = { version = "5.5.0", features = ["axum_extras", "uuid"] }
 utoipa-swagger-ui = { version = "9", features = ["axum", "reqwest"] }
 uuid = { version = "1", features = ["v4", "serde"] }
+thiserror = "2"
 
 [features]
 mock = []

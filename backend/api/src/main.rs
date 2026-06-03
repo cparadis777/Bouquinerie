@@ -2,7 +2,10 @@ use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use axum::{Router, routing::get};
+use axum::{Router, routing::get, routing::post};
+use axum_login::AuthManagerLayerBuilder;
+use axum_login::login_required;
+use axum_login::tower_sessions::{Expiry, SessionManagerLayer};
 use db::{init_database, run_migrations, state::AppState};
 use tokio::net::TcpListener;
 use tower_http::classify::ServerErrorsFailureClass;
@@ -10,16 +13,23 @@ use tower_http::cors::CorsLayer;
 use tower_http::request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetRequestIdLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
+use tower_sessions::session_store::ExpiredDeletion;
 use tracing::{Span, info, info_span};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
 
+use crate::auth::Backend;
+use crate::session_store::SeaOrmSessionStore;
+
+mod auth;
 mod error;
 mod handlers;
 mod health;
 mod logging;
 mod response;
+mod session;
+mod session_store;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -83,6 +93,33 @@ async fn main() {
 
     let state = AppState { db: db.clone() };
 
+    // Session store
+    let session_store = SeaOrmSessionStore::new(db.clone());
+    session_store
+        .delete_expired()
+        .await
+        .unwrap_or_else(|e| info!("initial session cleanup skipped: {e}"));
+    let _deletion_task = tokio::task::spawn({
+        let store = session_store.clone();
+        async move {
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(300)).await;
+                let _ = store.delete_expired().await;
+            }
+        }
+    });
+
+    // Auth layer
+    let session_layer = SessionManagerLayer::new(session_store)
+        .with_secure(
+            std::env::var("COOKIE_SECURE")
+                .map(|v| v == "true")
+                .unwrap_or(false),
+        )
+        .with_expiry(Expiry::OnInactivity(time::Duration::days(7)));
+    let backend = Backend { db: db.clone() };
+    let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
+
     let ingestion_cfg = ingestion::config::Config::from_env();
     info!(
         watched_dirs = ?ingestion_cfg.watched_dirs,
@@ -96,14 +133,20 @@ async fn main() {
         ingestion::watcher::start(watcher_db, ingestion_cfg).await;
     });
 
-    let app = Router::new()
-        .route("/health", get(health::health_check))
+    let api_routes = Router::new()
         .route("/api/books", get(handlers::books::list_books))
         .route("/api/books/{id}", get(handlers::books::get_book))
         .route("/api/authors", get(handlers::authors::list_authors))
         .route("/api/authors/{id}", get(handlers::authors::get_author))
         .route("/api/series", get(handlers::series::list_series))
         .route("/api/series/{id}", get(handlers::series::get_series))
+        .route_layer(login_required!(Backend, login_url = "/login"));
+
+    let app = Router::new()
+        .merge(api_routes)
+        .route("/health", get(health::health_check))
+        .route("/login", post(handlers::auth::login_handler))
+        .route("/logout", post(handlers::auth::logout_handler))
         .nest_service("/covers", ServeDir::new(&library_path))
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
         .layer(
@@ -143,6 +186,7 @@ async fn main() {
         )
         .layer(PropagateRequestIdLayer::x_request_id())
         .layer(CorsLayer::permissive())
+        .layer(auth_layer)
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .with_state(state);
 

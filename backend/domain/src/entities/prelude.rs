@@ -7,3 +7,4 @@ pub use super::books::Entity as Books;
 pub use super::identifiers::Entity as Identifiers;
 pub use super::series::Entity as Series;
 pub use super::series_books::Entity as SeriesBooks;
+pub use super::users::Entity as Users;
