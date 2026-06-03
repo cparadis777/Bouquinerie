@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { PaginationRoot, PaginationPrev, PaginationNext, PaginationList, PaginationListItem, PaginationEllipsis } from 'reka-ui'
 import { useRouter } from 'vue-router'
 import { useSeriesStore } from '../stores/series'
+import PageHeader from '../components/PageHeader.vue'
+import PaginationBar from '../components/PaginationBar.vue'
+import LoadingState from '../components/LoadingState.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const router = useRouter()
 const store = useSeriesStore()
@@ -11,13 +14,8 @@ onMounted(() => store.load())
 
 <template>
   <div class="series-view">
-    <div class="header">
-      <h1>Series</h1>
-      <span class="count caption">{{ store.total }} total</span>
-    </div>
-
-    <div v-if="store.loading" class="loading">Loading...</div>
-
+    <PageHeader title="Series" :count="store.total" />
+    <LoadingState v-if="store.loading" />
     <template v-else-if="store.data.length">
       <div class="list">
         <div
@@ -32,33 +30,13 @@ onMounted(() => store.load())
           </div>
         </div>
       </div>
-
-      <PaginationRoot
-        v-if="store.pages > 1"
+      <PaginationBar
         v-model:page="store.page"
-        :items-per-page="30"
         :total="store.total"
-        :sibling-count="2"
-        class="pagination"
-      >
-        <PaginationPrev class="pagination-btn">Previous</PaginationPrev>
-        <PaginationList v-slot="{ items }">
-          <template v-for="item in items">
-            <PaginationListItem
-              v-if="item.type === 'page'"
-              :key="item.value"
-              :value="item.value"
-              class="pagination-btn"
-            />
-            <PaginationEllipsis v-else :key="item.type" />
-          </template>
-        </PaginationList>
-        <span class="caption">Page {{ store.page }} of {{ store.pages }}</span>
-        <PaginationNext class="pagination-btn">Next</PaginationNext>
-      </PaginationRoot>
+        :page-size="30"
+      />
     </template>
-
-    <div v-else class="empty">No series found.</div>
+    <EmptyState v-else message="No series found." />
   </div>
 </template>
 
@@ -67,18 +45,6 @@ onMounted(() => store.load())
   display: flex;
   flex-direction: column;
   gap: 24px;
-}
-
-.header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.loading, .empty {
-  color: var(--text-muted);
-  padding: 48px 0;
-  text-align: center;
 }
 
 .list {
@@ -113,40 +79,5 @@ onMounted(() => store.load())
 .series-name {
   font-size: 14px;
   font-weight: 500;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px 0;
-}
-
-.pagination-btn {
-  padding: 8px 12px;
-  background: var(--surface-elevated);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.pagination-btn[data-selected="true"] {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--surface);
 }
 </style>

@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import type { components } from '../types/api'
 import { getBooks } from '../services/books'
 import { getAuthors } from '../services/authors'
 import { getSeries } from '../services/series'
-
-const router = useRouter()
+import BookCard from '../components/BookCard.vue'
+import LoadingState from '../components/LoadingState.vue'
+import ErrorState from '../components/ErrorState.vue'
 
 const bookCount = ref(0)
 const authorCount = ref(0)
 const seriesCount = ref(0)
-const recentBooks = ref<components["schemas"]["BookListEntry"][]>([])
+const recentBooks = ref<any[]>([])
 const loading = ref(true)
 const error = ref<Error | null>(null)
 
@@ -43,7 +42,8 @@ onMounted(async () => {
   <div class="dashboard">
     <h1>Dashboard</h1>
 
-    <div v-if="loading" class="loading">Loading...</div>
+    <LoadingState v-if="loading" />
+    <ErrorState v-else-if="error" :error="error" @retry="fetchStats()" />
 
     <template v-else>
       <div class="stats">
@@ -55,28 +55,14 @@ onMounted(async () => {
       <section class="section">
         <h2>Recently Added</h2>
         <div class="book-row" v-if="recentBooks.length">
-          <div
+          <BookCard
             v-for="entry in recentBooks"
             :key="entry.book.id"
-            class="book-card"
-            @click="router.push(`/books/${entry.book.id}`)"
-          >
-            <img
-              v-if="entry.book.cover_path"
-              :src="`/covers/${entry.book.cover_path}`"
-              alt=""
-              class="cover-image"
-            />
-            <div v-else class="cover-placeholder">{{ entry.book.title.charAt(0).toUpperCase() }}</div>
-            <div class="book-info">
-              <div class="book-title">{{ entry.book.title }}</div>
-              <div class="book-author">{{ entry.author_names.join(', ') }}</div>
-            </div>
-          </div>
+            :entry="entry"
+          />
         </div>
-        <div v-else class="empty">No books yet.</div>
+        <div v-else class="no-books">No books yet.</div>
       </section>
-
     </template>
   </div>
 </template>
@@ -86,12 +72,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 32px;
-}
-
-.loading {
-  color: var(--text-muted);
-  padding: 48px 0;
-  text-align: center;
 }
 
 .stats {
@@ -122,89 +102,14 @@ onMounted(async () => {
   padding-bottom: 8px;
 }
 
-.book-card {
+.book-row :deep(.book-card) {
   flex-shrink: 0;
   width: 140px;
-  cursor: pointer;
-  transition: transform 0.15s;
 }
 
-.book-card:hover {
-  transform: translateY(-2px);
-}
-
-.cover-image {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  border-radius: 4px;
-  object-fit: cover;
-  margin-bottom: 8px;
-}
-
-.cover-image.large {
-  width: 120px;
-}
-
-.cover-placeholder {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  background: var(--placeholder-1);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 32px;
-  color: var(--placeholder-fg);
-  margin-bottom: 8px;
-}
-
-.cover-placeholder.large {
-  width: 120px;
-  font-size: 40px;
-}
-
-.book-info {
-  padding: 0 2px;
-}
-
-.book-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.book-author {
-  font-size: 11px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.empty {
+.no-books {
   color: var(--text-muted);
   font-size: 14px;
   padding: 24px 0;
-}
-
-.surprise-card {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  background: var(--surface-elevated);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px;
-  cursor: pointer;
-  max-width: 400px;
-  transition: background 0.15s;
-}
-
-.surprise-card:hover {
-  background: var(--surface-hover);
 }
 </style>

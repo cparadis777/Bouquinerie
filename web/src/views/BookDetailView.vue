@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { CollapsibleRoot as Collapsible, CollapsibleTrigger, CollapsibleContent } from 'reka-ui'
-import AppButton from '../components/AppButton.vue'
 import { useBookStore } from '../stores/books'
+import BackButton from '../components/BackButton.vue'
+import BookCover from '../components/BookCover.vue'
+import LoadingState from '../components/LoadingState.vue'
 
 const route = useRoute()
-const router = useRouter()
 const store = useBookStore()
-
 const descExpanded = ref(false)
 
 onMounted(() => store.fetchBook(route.params.id as string))
@@ -16,21 +16,17 @@ onMounted(() => store.fetchBook(route.params.id as string))
 
 <template>
   <div class="detail">
-    <AppButton variant="ghost" @click="router.push('/books')">← Back to Books</AppButton>
+    <BackButton to="/books" label="Books" />
 
-    <div v-if="store.detailLoading" class="loading">Loading...</div>
+    <LoadingState v-if="store.detailLoading" />
 
     <template v-else-if="store.currentBook">
       <div class="hero">
-        <img
-          v-if="store.currentBook.book.cover_path"
-          :src="`/covers/${store.currentBook.book.cover_path}`"
-          alt=""
-          class="cover-image"
+        <BookCover
+          :cover-path="store.currentBook.book.cover_path"
+          :title="store.currentBook.book.title"
+          size="md"
         />
-        <div v-else class="cover-placeholder">
-          {{ store.currentBook.book.title.charAt(0).toUpperCase() }}
-        </div>
         <div class="hero-text">
           <h1>{{ store.currentBook.book.title }}</h1>
           <p v-if="store.currentBook.book.subtitle" class="subtitle">{{ store.currentBook.book.subtitle }}</p>
@@ -110,7 +106,7 @@ onMounted(() => store.fetchBook(route.params.id as string))
       </section>
     </template>
 
-    <div v-else class="loading">Book not found.</div>
+    <div v-else class="not-found">Book not found.</div>
   </div>
 </template>
 
@@ -122,7 +118,7 @@ onMounted(() => store.fetchBook(route.params.id as string))
   max-width: 700px;
 }
 
-.loading {
+.not-found {
   color: var(--text-muted);
   padding: 48px 0;
   text-align: center;
@@ -132,28 +128,6 @@ onMounted(() => store.fetchBook(route.params.id as string))
   display: flex;
   gap: 28px;
   align-items: flex-start;
-}
-
-.cover-image {
-  width: 140px;
-  aspect-ratio: 2 / 3;
-  border-radius: 6px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.cover-placeholder {
-  width: 140px;
-  aspect-ratio: 2 / 3;
-  background: var(--placeholder-2);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 48px;
-  color: var(--placeholder-fg);
-  flex-shrink: 0;
 }
 
 .hero-text {
