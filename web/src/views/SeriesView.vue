@@ -1,49 +1,27 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { PaginationRoot, PaginationPrev, PaginationNext, PaginationList, PaginationListItem, PaginationEllipsis } from 'reka-ui'
-import { api } from '../api/client'
 import { useRouter } from 'vue-router'
-import type { components } from '../types/api'
+import { useSeriesStore } from '../stores/series'
 
 const router = useRouter()
-
-const seriesList = ref<components["schemas"]["Series"][]>([])
-const total = ref(0)
-const page = ref(1)
-const loading = ref(true)
-const pageSize = 30
-const pages = computed(() => Math.ceil(total.value / pageSize))
-
-async function loadSeries() {
-  loading.value = true
-  const res = await api.GET('/api/series', {
-    params: { query: { page: page.value, page_size: pageSize } },
-  })
-  if (res.data) {
-    seriesList.value = res.data.data
-    total.value = res.data.total
-    page.value = res.data.page
-  }
-  loading.value = false
-}
-
-watch(page, loadSeries)
-onMounted(() => loadSeries())
+const store = useSeriesStore()
+onMounted(() => store.load())
 </script>
 
 <template>
   <div class="series-view">
     <div class="header">
       <h1>Series</h1>
-      <span class="count caption">{{ total }} total</span>
+      <span class="count caption">{{ store.total }} total</span>
     </div>
 
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="store.loading" class="loading">Loading...</div>
 
-    <template v-else-if="seriesList.length">
+    <template v-else-if="store.data.length">
       <div class="list">
         <div
-          v-for="s in seriesList"
+          v-for="s in store.data"
           :key="s.id"
           class="series-card"
           @click="router.push(`/series/${s.id}`)"
@@ -56,10 +34,10 @@ onMounted(() => loadSeries())
       </div>
 
       <PaginationRoot
-        v-if="pages > 1"
-        v-model:page="page"
-        :items-per-page="pageSize"
-        :total="total"
+        v-if="store.pages > 1"
+        v-model:page="store.page"
+        :items-per-page="30"
+        :total="store.total"
         :sibling-count="2"
         class="pagination"
       >
@@ -75,7 +53,7 @@ onMounted(() => loadSeries())
             <PaginationEllipsis v-else :key="item.type" />
           </template>
         </PaginationList>
-        <span class="caption">Page {{ page }} of {{ pages }}</span>
+        <span class="caption">Page {{ store.page }} of {{ store.pages }}</span>
         <PaginationNext class="pagination-btn">Next</PaginationNext>
       </PaginationRoot>
     </template>

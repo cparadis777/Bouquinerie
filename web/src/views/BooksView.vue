@@ -1,34 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { PaginationRoot, PaginationPrev, PaginationNext, PaginationList, PaginationListItem, PaginationEllipsis } from 'reka-ui'
-import { api } from '../api/client'
 import { useRouter } from 'vue-router'
-import type { components } from '../types/api'
+import { useBookStore } from '../stores/books'
 
 const router = useRouter()
-
-const books = ref<components["schemas"]["BookListEntry"][]>([])
-const total = ref(0)
-const page = ref(1)
-const loading = ref(true)
-const pageSize = 20
-const pages = computed(() => Math.ceil(total.value / pageSize))
-
-async function loadBooks() {
-  loading.value = true
-  const res = await api.GET('/api/books', {
-    params: { query: { page: page.value, page_size: pageSize } },
-  })
-  if (res.data) {
-    books.value = res.data.data
-    total.value = res.data.total
-    page.value = res.data.page
-  }
-  loading.value = false
-}
-
-watch(page, loadBooks)
-onMounted(() => loadBooks())
+const store = useBookStore()
+onMounted(() => store.load())
 
 function placeholderTint(index: number): string {
   const tints = [
@@ -46,15 +24,15 @@ function placeholderTint(index: number): string {
   <div class="books-view">
     <div class="header">
       <h1>Books</h1>
-      <span class="count caption">{{ total }} total</span>
+      <span class="count caption">{{ store.total }} total</span>
     </div>
 
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="store.loading" class="loading">Loading...</div>
 
-    <template v-else-if="books.length">
+    <template v-else-if="store.data.length">
       <div class="grid">
         <div
-          v-for="(entry, idx) in books"
+          v-for="(entry, idx) in store.data"
           :key="entry.book.id"
           class="book-card"
           @click="router.push(`/books/${entry.book.id}`)"
@@ -78,10 +56,10 @@ function placeholderTint(index: number): string {
       </div>
 
       <PaginationRoot
-        v-if="pages > 1"
-        v-model:page="page"
-        :items-per-page="pageSize"
-        :total="total"
+        v-if="store.pages > 1"
+        v-model:page="store.page"
+        :items-per-page="20"
+        :total="store.total"
         :sibling-count="2"
         class="pagination"
       >
@@ -97,7 +75,7 @@ function placeholderTint(index: number): string {
             <PaginationEllipsis v-else :key="item.type" />
           </template>
         </PaginationList>
-        <span class="caption">Page {{ page }} of {{ pages }}</span>
+        <span class="caption">Page {{ store.page }} of {{ store.pages }}</span>
         <PaginationNext class="pagination-btn">Next</PaginationNext>
       </PaginationRoot>
     </template>

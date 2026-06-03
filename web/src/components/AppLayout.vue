@@ -35,7 +35,7 @@ const isMobile = computed(() => windowWidth.value < 800)
   flex: 1;
   padding: 32px;
   padding-bottom: 80px;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   width: 100%;
 }
 

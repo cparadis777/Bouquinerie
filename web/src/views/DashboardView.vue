@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { api } from '../api/client'
 import { useRouter } from 'vue-router'
 import type { components } from '../types/api'
+import { getBooks } from '../services/books'
+import { getAuthors } from '../services/authors'
+import { getSeries } from '../services/series'
 
 const router = useRouter()
 
@@ -11,31 +13,28 @@ const authorCount = ref(0)
 const seriesCount = ref(0)
 const recentBooks = ref<components["schemas"]["BookListEntry"][]>([])
 const loading = ref(true)
+const error = ref<Error | null>(null)
 
 async function fetchStats() {
-  const [booksRes, authorsRes, seriesRes] = await Promise.all([
-    api.GET('/api/books', { params: { query: { page: 1, page_size: 10 } } }),
-    api.GET('/api/authors', { params: { query: { page: 1, page_size: 1 } } }),
-    api.GET('/api/series', { params: { query: { page: 1, page_size: 1 } } }),
+  const [books, authors, series] = await Promise.all([
+    getBooks({ page: 1, page_size: 10 }),
+    getAuthors({ page: 1, page_size: 1 }),
+    getSeries({ page: 1, page_size: 1 }),
   ])
-
-  if (booksRes.data) {
-    bookCount.value = booksRes.data.total
-    recentBooks.value = booksRes.data.data.slice(0, 10)
-  }
-  if (authorsRes.data) {
-    authorCount.value = authorsRes.data.total
-  }
-  if (seriesRes.data) {
-    seriesCount.value = seriesRes.data.total
-  }
+  bookCount.value = books.total
+  recentBooks.value = books.data.slice(0, 10)
+  authorCount.value = authors.total
+  seriesCount.value = series.total
 }
-
-
 
 onMounted(async () => {
   loading.value = true
-  await Promise.all([fetchStats()])
+  error.value = null
+  try {
+    await fetchStats()
+  } catch (e) {
+    error.value = e as Error
+  }
   loading.value = false
 })
 </script>

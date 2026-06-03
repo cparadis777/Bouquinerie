@@ -1,49 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import type { components } from '../types/api'
 import AppButton from '../components/AppButton.vue'
-import { api } from '../api/client'
+import { useAuthorStore } from '../stores/authors'
 
 const router = useRouter()
 const route = useRoute()
-
-const authorName = ref('')
-const books = ref<components["schemas"]["BookListEntry"][]>([])
-const loading = ref(true)
-
-onMounted(async () => {
-  const id = route.params.id as string
-
-  const [authorRes, booksRes] = await Promise.all([
-    api.GET('/api/authors/{id}', { params: { path: { id } } }),
-    api.GET('/api/books', { params: { query: { author_id: id, page: 1, page_size: 100 } } }),
-  ])
-
-  if (authorRes.data) {
-    authorName.value = authorRes.data.name
-  }
-  if (booksRes.data) {
-    books.value = booksRes.data.data
-  }
-
-  loading.value = false
-})
+const store = useAuthorStore()
+onMounted(() => store.fetchAuthor(route.params.id as string))
 </script>
 
 <template>
   <div class="author-detail">
     <AppButton variant="ghost" @click="router.push('/authors')">← Back to Authors</AppButton>
 
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="store.detailLoading" class="loading">Loading...</div>
 
-    <template v-else>
-      <h1>{{ authorName }}</h1>
-      <p class="caption" v-if="books.length">{{ books.length }} books</p>
+    <template v-else-if="store.currentAuthor">
+      <h1>{{ store.currentAuthor.name }}</h1>
+      <p class="caption" v-if="store.authorBooks.length">{{ store.authorBooks.length }} books</p>
 
-      <div class="grid" v-if="books.length">
+      <div class="grid" v-if="store.authorBooks.length">
         <div
-          v-for="entry in books"
+          v-for="entry in store.authorBooks"
           :key="entry.book.id"
           class="book-card"
           @click="router.push(`/books/${entry.book.id}`)"

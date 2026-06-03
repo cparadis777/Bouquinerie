@@ -1,49 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { api } from '../api/client'
 import AppButton from '../components/AppButton.vue'
-import type { components } from '../types/api'
+import { useSeriesStore } from '../stores/series'
 
 const router = useRouter()
 const route = useRoute()
-
-const seriesName = ref('')
-const books = ref<components["schemas"]["BookListEntry"][]>([])
-const loading = ref(true)
-
-onMounted(async () => {
-  const id = route.params.id as string
-
-  const [seriesRes, booksRes] = await Promise.all([
-    api.GET('/api/series/{id}', { params: { path: { id } } }),
-    api.GET('/api/books', { params: { query: { series_id: id, page: 1, page_size: 100 } } }),
-  ])
-
-  if (seriesRes.data) {
-    seriesName.value = seriesRes.data.name
-  }
-  if (booksRes.data) {
-    books.value = booksRes.data.data
-  }
-
-  loading.value = false
-})
+const store = useSeriesStore()
+onMounted(() => store.fetchSeries(route.params.id as string))
 </script>
 
 <template>
   <div class="series-detail">
     <AppButton variant="ghost" @click="router.push('/series')">← Back to Series</AppButton>
 
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="store.detailLoading" class="loading">Loading...</div>
 
-    <template v-else>
-      <h1>{{ seriesName }}</h1>
-      <p class="caption" v-if="books.length">{{ books.length }} books in series</p>
+    <template v-else-if="store.currentSeries">
+      <h1>{{ store.currentSeries.name }}</h1>
+      <p class="caption" v-if="store.seriesBooks.length">{{ store.seriesBooks.length }} books in series</p>
 
-      <div class="list" v-if="books.length">
+      <div class="list" v-if="store.seriesBooks.length">
         <div
-          v-for="(entry, _idx) in books"
+          v-for="(entry, _idx) in store.seriesBooks"
           :key="entry.book.id"
           class="series-book"
           @click="router.push(`/books/${entry.book.id}`)"

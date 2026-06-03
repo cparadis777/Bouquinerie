@@ -27,8 +27,8 @@
   },
 
   "mounts": [
-    "source=~/.ssh/,target=/root/.ssh,type=bind,consistency=cached",
-    "source=${env:SSH_AUTH_SOCK},target=/tmp/ssh-agent.sock,type=bind"
+    "source=~/.ssh/,target=/root/.ssh,type=bind,z,consistency=cached",
+    "source=${env:SSH_AUTH_SOCK},target=/tmp/ssh-agent.sock,type=bind,z"
   ],
 
   "containerEnv": {
