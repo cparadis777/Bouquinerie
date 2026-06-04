@@ -82,6 +82,16 @@ pub struct BookResponse {
     pub identifiers: Vec<domain::entities::identifiers::Model>,
 }
 
+#[derive(Serialize, ToSchema)]
+pub struct UserResponse {
+    pub id: Uuid,
+    pub username: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    pub email: String,
+    pub is_admin: bool,
+}
+
 pub fn normalize_page(page: Option<u64>) -> u64 {
     page.unwrap_or(1).max(1)
 }
