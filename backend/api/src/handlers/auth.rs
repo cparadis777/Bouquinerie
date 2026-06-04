@@ -24,7 +24,7 @@ pub struct RegisterRequest {
 
 #[utoipa::path(
     post,
-    path = "/register",
+    path = "/api/register",
     request_body = RegisterRequest,
     responses(
         (status = 201, description = "User created", body = UserResponse),
@@ -130,7 +130,7 @@ pub async fn register_handler(
 
 #[utoipa::path(
     post,
-    path = "/login",
+    path = "/api/login",
     request_body = Credentials,
     responses(
         (status = 200, description = "Logged in", body = serde_json::Value),
@@ -172,7 +172,7 @@ pub async fn login_handler(
 
 #[utoipa::path(
     post,
-    path = "/logout",
+    path = "/api/logout",
     responses(
         (status = 200, description = "Logged out", body = serde_json::Value)
     )
@@ -184,7 +184,7 @@ pub async fn logout_handler(mut auth: AuthSession<Backend>) -> impl IntoResponse
 
 #[utoipa::path(
     get,
-    path = "/me",
+    path = "/api/me",
     responses(
         (status = 200, description = "Current user", body = UserResponse),
         (status = 401, description = "Not authenticated")

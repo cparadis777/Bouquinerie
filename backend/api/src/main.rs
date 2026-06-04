@@ -147,15 +147,15 @@ async fn main() {
         .route("/api/authors/{id}", get(handlers::authors::get_author))
         .route("/api/series", get(handlers::series::list_series))
         .route("/api/series/{id}", get(handlers::series::get_series))
-        .route_layer(login_required!(Backend, login_url = "/login"));
+        .route_layer(login_required!(Backend, login_url = "/api/login"));
 
     let app = Router::new()
         .merge(api_routes)
         .route("/health", get(health::health_check))
-        .route("/login", post(handlers::auth::login_handler))
-        .route("/logout", post(handlers::auth::logout_handler))
-        .route("/me", get(handlers::auth::me_handler))
-        .route("/register", post(handlers::auth::register_handler))
+        .route("/api/login", post(handlers::auth::login_handler))
+        .route("/api/logout", post(handlers::auth::logout_handler))
+        .route("/api/me", get(handlers::auth::me_handler))
+        .route("/api/register", post(handlers::auth::register_handler))
         .nest_service("/covers", ServeDir::new(&library_path))
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
         .layer(
