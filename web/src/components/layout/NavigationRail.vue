@@ -36,7 +36,7 @@ const tabs = [
       </router-link>
     </div>
     <div v-if="auth.user" class="user-section">
-      <span class="user-name">{{ auth.user.name || auth.user.username }}</span>
+      <span class="avatar">{{ (auth.user.name || auth.user.username).charAt(0).toUpperCase() }}</span>
       <button class="logout-btn" @click="handleLogout()">Log out</button>
     </div>
   </nav>
@@ -115,12 +115,18 @@ const tabs = [
   border-top: 1px solid var(--border);
 }
 
-.user-name {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.3;
-  word-break: break-all;
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .logout-btn {
