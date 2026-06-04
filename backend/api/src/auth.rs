@@ -14,7 +14,7 @@ pub struct Backend {
     pub db: DatabaseConnection,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, utoipa::ToSchema)]
 pub struct Credentials {
     pub username: String,
     pub password: String,

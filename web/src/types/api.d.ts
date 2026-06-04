@@ -116,6 +116,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["login_handler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["logout_handler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_handler"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["register_handler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -138,15 +202,14 @@ export interface components {
             total: number;
         };
         Book: {
-            book_path?: string | null;
+            book_path: string;
             cover_path: string;
             /** Format: date-time */
             created_at: string;
             description: string;
-            file_hash?: string | null;
+            file_hash: string;
             /** Format: uuid */
             id: string;
-            isbn: string;
             language: string;
             /** Format: int32 */
             page_count: number;
@@ -154,7 +217,7 @@ export interface components {
             published_date: string;
             publisher: string;
             /** Format: int64 */
-            size_bytes?: number | null;
+            size_bytes: number;
             sort_title: string;
             subtitle: string;
             title: string;
@@ -182,6 +245,10 @@ export interface components {
             identifiers: components["schemas"]["Identifier"][];
             series: components["schemas"]["Series"][];
         };
+        Credentials: {
+            password: string;
+            username: string;
+        };
         Identifier: {
             /** Format: uuid */
             book_id: string;
@@ -189,6 +256,12 @@ export interface components {
             id: string;
             source: string;
             value: string;
+        };
+        RegisterRequest: {
+            email: string;
+            name?: string | null;
+            password: string;
+            username: string;
         };
         Series: {
             /** Format: date-time */
@@ -210,6 +283,14 @@ export interface components {
             pages: number;
             /** Format: int64 */
             total: number;
+        };
+        UserResponse: {
+            email: string;
+            /** Format: uuid */
+            id: string;
+            is_admin: boolean;
+            name?: string | null;
+            username: string;
         };
     };
     responses: never;
@@ -396,6 +477,122 @@ export interface operations {
             };
             /** @description Service unhealthy */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    login_handler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Credentials"];
+            };
+        };
+        responses: {
+            /** @description Logged in */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Invalid credentials */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    logout_handler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    me_handler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    register_handler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description User created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Username or email already taken */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

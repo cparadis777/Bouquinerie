@@ -41,7 +41,10 @@ mod session_store;
         handlers::authors::get_author,
         handlers::series::list_series,
         handlers::series::get_series,
+        handlers::auth::login_handler,
+        handlers::auth::logout_handler,
         handlers::auth::me_handler,
+        handlers::auth::register_handler,
     ),
     components(schemas(
         domain::entities::books::Model,
@@ -54,6 +57,8 @@ mod session_store;
         response::SeriesListResponse,
         response::BookResponse,
         response::UserResponse,
+        handlers::auth::RegisterRequest,
+        auth::Credentials,
     )),
     info(
         title = "Bouquinerie",
@@ -150,6 +155,7 @@ async fn main() {
         .route("/login", post(handlers::auth::login_handler))
         .route("/logout", post(handlers::auth::logout_handler))
         .route("/me", get(handlers::auth::me_handler))
+        .route("/register", post(handlers::auth::register_handler))
         .nest_service("/covers", ServeDir::new(&library_path))
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
         .layer(

@@ -106,20 +106,10 @@ tasks:
   frontend:generate:api:
     desc: Generate TypeScript types from the API's OpenAPI spec (starts backend if needed)
     dir: web
-    cmds:
-      - task: _api:ensure_running
-        background: true
-      - 'echo "Waiting for API to be ready..." && until curl -sfo /dev/null http://localhost:3000/api-docs/openapi.json; do sleep 1; done && echo "API is ready."'
       - bun run generate:api
     requires:
       vars: ["DATABASE_URL"]
 
-  _api:ensure_running:
-    internal: true
-    desc: Start the Rust API server in the background if not already running
-    dir: "{{.RUST_DIR}}/api"
-    cmds:
-      - 'if ! curl -sfo /dev/null http://localhost:3000/api-docs/openapi.json 2>/dev/null; then echo "Starting Rust backend..."; cargo run --bin api; fi'
 
   frontend:lint:
     desc: Run TypeScript type checking
