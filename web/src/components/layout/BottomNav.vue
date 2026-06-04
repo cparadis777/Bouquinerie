@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
+async function handleLogout() {
+  await auth.logout()
+  router.push('/login')
+}
 
 const tabs = [
   { name: 'dashboard', label: 'Dashboard', path: '/', icon: '⊞' },
@@ -23,6 +31,10 @@ const tabs = [
       <span class="icon">{{ tab.icon }}</span>
       <span class="label">{{ tab.label }}</span>
     </router-link>
+    <button v-if="auth.user" class="tab logout-tab" @click="handleLogout()">
+      <span class="icon">⊘</span>
+      <span class="label">Log out</span>
+    </button>
   </nav>
 </template>
 

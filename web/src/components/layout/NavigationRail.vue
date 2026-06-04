@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Icon } from "@iconify/vue";
+import { useAuthStore } from '../../stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
+async function handleLogout() {
+  await auth.logout()
+  router.push('/login')
+}
 
 const tabs = [
   { name: 'dashboard', label: 'Dashboard', path: '/', icon: 'material-symbols:home' },
@@ -26,6 +34,10 @@ const tabs = [
         <Icon :icon="tab.icon" />
         <span class="label">{{ tab.label }}</span>
       </router-link>
+    </div>
+    <div v-if="auth.user" class="user-section">
+      <span class="user-name">{{ auth.user.name || auth.user.username }}</span>
+      <button class="logout-btn" @click="handleLogout()">Log out</button>
     </div>
   </nav>
 </template>
@@ -90,5 +102,39 @@ const tabs = [
 .label {
   font-size: 11px;
   font-weight: 500;
+}
+
+.user-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  width: 100%;
+  border-top: 1px solid var(--border);
+}
+
+.user-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.logout-btn {
+  font-size: 11px;
+  color: var(--primary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.logout-btn:hover {
+  background: var(--surface-hover);
 }
 </style>

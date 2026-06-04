@@ -3,4 +3,5 @@ import type { paths } from '../types/api'
 
 export const api = createClient<paths>({
   baseUrl: '',
+  credentials: 'include',
 })
