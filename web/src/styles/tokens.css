@@ -12,6 +12,24 @@
   --border: #3D352B;
   --placeholder-fg: #D0C0AA;
 
+
+  /* ── Browns ────────────────────────────────────────────── */
+  --brown-50: #fdf6ef;
+  --brown-100: #f5e8d5;
+  --brown-300: #c9976a;
+  --brown-500: #8b5a2b;
+  --brown-700: #5c3518;
+  --brown-900: #2d1a0a;
+
+  /* ── Ambers ────────────────────────────────────────────── */
+  --amber-200: #fde68a;
+  --amber-400: #f59e0b;
+  --amber-600: #d97706;
+
+  /* ── Neutrals ────────────────────────────────────────────── */
+  --warm-white: #fdf8f3;
+  --warm-grey: #9e8a78;
+
   /* Placeholder cover tints */
   --placeholder-1: linear-gradient(135deg, #7A3B3B, #8B3A3A);
   --placeholder-2: linear-gradient(135deg, #7A6B4B, #8B7A5A);
@@ -27,7 +45,9 @@
 
   /* ── Typography ──────────────────────────────────────── */
   --font-heading: 'Crimson Pro', Georgia, serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-body-alt: 'Jakarta', system-ui, -apple-system, sans-serif;
+
 
   /* Modular scale (1.25 ratio, base 15px) */
   --text-xs: 11px;
