@@ -8,6 +8,7 @@ export default defineConfig({
       '/api': 'http://localhost:3000',
       '/docs': 'http://localhost:3000',
       '/health': 'http://localhost:3000',
+      '/covers':'http://localhost:3000',
     },
   },
   build: {

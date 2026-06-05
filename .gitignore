@@ -24,4 +24,7 @@ incoming/
 library/
 *.epub
 *.md
+*.pdf
+*.mp4
+*.avi
 !README.md

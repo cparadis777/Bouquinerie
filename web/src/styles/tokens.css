@@ -1,0 +1,77 @@
+:root {
+  /* ── Colors ──────────────────────────────────────────── */
+  --surface: #191512;
+  --surface-elevated: #241E18;
+  --surface-hover: #2D2620;
+  --primary: #D9AA7A;
+  --primary-hover: #E8BA8A;
+  --accent: #A04545;
+  --accent-hover: #B05555;
+  --text: #F5EDE4;
+  --text-muted: #C4B4A2;
+  --border: #3D352B;
+  --placeholder-fg: #D0C0AA;
+
+  /* Placeholder cover tints */
+  --placeholder-1: linear-gradient(135deg, #7A3B3B, #8B3A3A);
+  --placeholder-2: linear-gradient(135deg, #7A6B4B, #8B7A5A);
+  --placeholder-3: linear-gradient(135deg, #4A6741, #5A7751);
+  --placeholder-4: linear-gradient(135deg, #8E5B3A, #9E6B4A);
+  --placeholder-5: linear-gradient(135deg, #3A4A5A, #4A5A6A);
+
+  /* Semantic colors */
+  --success: #5A8A5A;
+  --warning: #C49A3A;
+  --error: #B84A4A;
+  --info: #5A8AAA;
+
+  /* ── Typography ──────────────────────────────────────── */
+  --font-heading: 'Crimson Pro', Georgia, serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Modular scale (1.25 ratio, base 15px) */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 19px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+  --text-3xl: 36px;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Spacing (8px grid, with half-steps for fine-tuning) ─ */
+  --space-0_5: 4px;
+  --space-1: 8px;
+  --space-1_5: 12px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-7: 56px;
+  --space-8: 64px;
+  --space-9: 72px;
+  --space-10: 80px;
+  --space-12: 96px;
+  --space-16: 128px;
+
+  /* ── Border Radius ───────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 50%;
+
+  /* ── Shadows (warm dark) ─────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+  /* ── Transitions ─────────────────────────────────────── */
+  --transition-fast: 150ms ease;
+}

@@ -85,11 +85,17 @@ tasks:
     cmds:
       - bun install
 
-  frontend:dev:
+  frontend:dev-server:
     desc: Start Vite dev server (proxies /api to Rust on :3000)
     dir: web
     cmds:
       - bun run dev
+
+  frontend:dev:
+    desc: Start backend + vite dev server
+    deps:
+      - task: api:run
+      - task: frontend:dev-server
 
   frontend:build:
     desc: Build Vue app for production (outputs to web/dist/)
