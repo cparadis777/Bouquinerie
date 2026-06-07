@@ -1,55 +1,58 @@
 :root {
   /* ── Colors ──────────────────────────────────────────── */
-  --surface: #191512;
-  --surface-elevated: #241E18;
-  --surface-hover: #2D2620;
-  --primary: #D9AA7A;
-  --primary-hover: #E8BA8A;
-  --accent: #A04545;
-  --accent-hover: #B05555;
-  --text: #F5EDE4;
-  --text-muted: #C4B4A2;
-  --border: #3D352B;
-  --placeholder-fg: #D0C0AA;
-
+  --surface: hsl(26, 16%, 8%);
+  --surface-elevated: hsl(30, 20%, 12%);
+  --surface-hover: hsl(28, 17%, 15%);
+  --primary: hsl(30, 56%, 67%);
+  --primary-hover: hsl(31, 67%, 73%);
+  --accent: var(--amber-200);
+  --accent-hover: hsl(0, 37%, 51%);
+  --text: var(--warm-white);
+  --text-muted: var(--warm-grey);
+  --border: hsl(33, 17%, 20%);
+  --placeholder-fg: hsl(35, 29%, 74%);
 
   /* ── Browns ────────────────────────────────────────────── */
-  --brown-50: #fdf6ef;
-  --brown-100: #f5e8d5;
-  --brown-300: #c9976a;
-  --brown-500: #8b5a2b;
-  --brown-700: #5c3518;
-  --brown-900: #2d1a0a;
+  --brown-100: hsl(30, 78%, 97%);
+  --brown-200: hsl(36, 62%, 90%);
+  --brown-300: hsl(28, 47%, 60%);
+  --brown-500: hsl(29, 53%, 36%);
+  --brown-700: hsl(26, 59%, 23%);
+  --brown-900: hsl(27, 64%, 11%);
 
   /* ── Ambers ────────────────────────────────────────────── */
-  --amber-200: #fde68a;
-  --amber-400: #f59e0b;
-  --amber-600: #d97706;
+  --amber-900: hsl(27, 100%, 20%);
+  --amber-800: hsl(31, 100%, 26%);
+  --amber-700: hsl(36, 100%, 28%);
+  --amber-600: hsl(43, 100%, 40%);
+  --amber-500: hsl(45, 68%, 50%);
+  --amber-400: hsl(51 68% 53%);
+  --amber-300: hsl(52, 87%, 52%);
+  --amber-200: hsl(56 87% 67%);
+  --amber-100: hsl(48, 100%, 84%);
 
   /* ── Neutrals ────────────────────────────────────────────── */
-  --warm-white: #fdf8f3;
-  --warm-grey: #9e8a78;
+  --warm-white: hsl(30, 71%, 97%);
+  --warm-grey: hsl(28, 16%, 55%);
 
   /* Placeholder cover tints */
-  --placeholder-1: linear-gradient(135deg, #7A3B3B, #8B3A3A);
-  --placeholder-2: linear-gradient(135deg, #7A6B4B, #8B7A5A);
-  --placeholder-3: linear-gradient(135deg, #4A6741, #5A7751);
-  --placeholder-4: linear-gradient(135deg, #8E5B3A, #9E6B4A);
-  --placeholder-5: linear-gradient(135deg, #3A4A5A, #4A5A6A);
+  --placeholder-1: linear-gradient(135deg, #7a3b3b, #8b3a3a);
+  --placeholder-2: linear-gradient(135deg, #7a6b4b, #8b7a5a);
+  --placeholder-3: linear-gradient(135deg, #4a6741, #5a7751);
+  --placeholder-4: linear-gradient(135deg, #8e5b3a, #9e6b4a);
+  --placeholder-5: linear-gradient(135deg, #3a4a5a, #4a5a6a);
 
   /* Semantic colors */
-  --success: #5A8A5A;
-  --warning: #C49A3A;
-  --error: #B84A4A;
-  --info: #5A8AAA;
+  --success: hsl(120, 21%, 45%);
+  --warning: hsl(42, 54%, 50%);
+  --error: hsl(0, 44%, 51%);
+  --info: hsl(204, 32%, 51%);
 
   /* ── Typography ──────────────────────────────────────── */
-  --font-heading: 'Crimson Pro', Georgia, serif;
-  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
-  --font-body-alt: 'Jakarta', system-ui, -apple-system, sans-serif;
+  --font-heading: "Crimson Pro", Georgia, serif;
+  --font-body: "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-body-alt: "Jakarta", system-ui, -apple-system, sans-serif;
 
-
-  /* Modular scale (1.25 ratio, base 15px) */
   --text-xs: 11px;
   --text-sm: 13px;
   --text-base: 15px;
@@ -63,21 +66,21 @@
   --weight-semibold: 600;
   --weight-bold: 700;
 
-  /* ── Spacing (8px grid, with half-steps for fine-tuning) ─ */
-  --space-0_5: 4px;
-  --space-1: 8px;
-  --space-1_5: 12px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 40px;
-  --space-6: 48px;
-  --space-7: 56px;
-  --space-8: 64px;
-  --space-9: 72px;
-  --space-10: 80px;
-  --space-12: 96px;
-  --space-16: 128px;
+  /* ── Spacings ──────────────────────────────────────── */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 2.5rem;
+  --space-7: 3rem;
+  --space-8: 3.5rem;
+  --space-9: 4rem;
+  --space-10: 4.5rem;
+  --space-11: 5rem;
+  --space-12: 6rem;
+  --space-13: 8rem;
 
   /* ── Border Radius ───────────────────────────────────── */
   --radius-sm: 4px;
