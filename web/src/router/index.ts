@@ -53,6 +53,11 @@ const router = createRouter({
     //   name: 'series-detail',
     //   component: () => import('../views/SeriesDetailView.vue'),
     // },
+    {
+      path: '/dev/palettes',
+      name: 'palettes',
+      component: () => import('../views/dev/Palette.vue'),
+    },
   ],
 })
 

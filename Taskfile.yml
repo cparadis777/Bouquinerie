@@ -89,7 +89,7 @@ tasks:
     desc: Start Vite dev server (proxies /api to Rust on :3000)
     dir: web
     cmds:
-      - bun run dev
+      - bun run dev --host
 
   frontend:dev:
     desc: Start backend + vite dev server

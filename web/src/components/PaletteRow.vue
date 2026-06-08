@@ -1,7 +1,11 @@
 <template>
-  <div style="display: flex;">
-    <ColorBox v-for="shade in shades" :color=shade />
+  <div>
+    <h2>{{ props.color }}</h2>
+    <div style="display: flex;">
+      <ColorBox v-for="shade in shades" :color=shade />
+    </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -10,7 +14,7 @@
   const props = defineProps(["color", "count"])
 
   function shade_generator(color: string, ...values: number[]) {
-    return values.map(v => `--${color}-${v}`)
+    return values.map(v => `${color}-${v}`)
   }
 
 

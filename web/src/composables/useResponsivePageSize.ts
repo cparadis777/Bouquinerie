@@ -18,10 +18,8 @@ export function useResponsivePageSize(options: {
     const minCardWidth = parseInt(style.getPropertyValue('--min-card-width')) || 160
     const gap = parseInt(style.getPropertyValue('--card-gap')) || 24
 
-    const sidebarWidth = window.innerWidth >= 800 ? 72 : 0
-    const padding = window.innerWidth >= 800 ? 64 : 32
-    const contentWidth = window.innerWidth - sidebarWidth - padding
-    const columns = Math.max(1, Math.floor(contentWidth / (minCardWidth + gap)))
+
+    const columns = Math.max(1, Math.floor(el.clientWidth / (minCardWidth + gap)))
     pageSize.value = Math.max(minPageSize, columns * targetRows)
   }
 
