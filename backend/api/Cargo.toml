@@ -12,7 +12,7 @@ domain = { path="../domain" }
 ingestion = { path = "../ingestion" }
 repository = { path = "../repository" }
 dotenvy = "0.15"
-sea-orm = { version = "2.0.0-rc.38", features = ["macros"] }
+sea-orm = { version = "2.0.0-rc.40", features = ["macros"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0.150"
 time = "0.3"
